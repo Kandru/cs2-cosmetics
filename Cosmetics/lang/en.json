@@ -1,0 +1,9 @@
+{
+    "core.hotreload": "[Cosmetics] Hot-Reloaded Plugin! Rolling from next round!",
+    "core.unload": "[Cosmetics] Unloaded Plugin!",
+    "core.defaultconfig": "[Cosmetics] Found no map-specific configuration for {mapName}, using default one!",
+    "core.noconfig": "[Cosmetics] No map-specific configuration for {mapName} or default one found. Skipping!",
+    "core.foundconfig": "[Cosmetics] Found {count} matching map-specific configurations for {mapName}!",
+    "core.error": "{purple}[Cosmetics] {default}Error: {error}",
+    "core.disabled": "{purple}[Cosmetics] {default}is disabled!"
+}

@@ -1,0 +1,9 @@
+{
+    "core.hotreload": "[Kosmetik] Neu geladen! Würfen ab nächster Runde!",
+    "core.unload": "[Kosmetik] Plugin entladen!",
+    "core.defaultconfig": "[Kosmetik] Keine kartenspezifische Konfiguration für {mapName} gefunden, Standardkonfiguration wird verwendet!",
+    "core.noconfig": "[Kosmetik] Keine kartenspezifische Konfiguration für {mapName} oder Standardkonfiguration gefunden. Überspringen!",
+    "core.foundconfig": "[Kosmetik] {count} passende kartenspezifische Konfigurationen für {mapName} gefunden!",
+    "core.error": "{purple}[Kosmetik] {default}Fehler: {error}",
+    "core.disabled": "{purple}[Kosmetik] {default}ist deaktiviert!"
+}
