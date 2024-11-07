@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  REPOSITORY_NAME: "cs2-cosmetics" # same as on github
   REPOSITORY_FOLDER: "Cosmetics" # subfolder with source code
 
 jobs:
@@ -15,30 +14,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Get Repository Name
+      run: echo "REPOSITORY_NAME=`basename ${{ github.repository }}`" >> $GITHUB_ENV
+  
+    - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Set up .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '8.0.x'
-
-    - name: Install dependencies
-      run: dotnet restore
-
-    - name: Get current version from ${{ env.REPOSITORY_FOLDER }}.cs
+    - name: Get Current Project Version Number From ${{ env.REPOSITORY_FOLDER }}.cs
       id: get_version
       run: |
         version=$(grep -oP '(?<=ModuleVersion => ")[^"]*' ${{ env.REPOSITORY_FOLDER }}/${{ env.REPOSITORY_FOLDER }}.cs)
         echo "version=$version" >> $GITHUB_ENV
 
-    - name: Get latest release version
+    - name: Get Current Release Version Number
       id: get_latest_release
       run: |
-        latest_release=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
+        latest_release=$(curl -s -H "Authorization: token ${{ secrets.UPLOAD_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
         echo "latest_release=$latest_release" >> $GITHUB_ENV
 
-    - name: Compare versions
+    - name: Compare Versions
       id: compare_versions
       run: |
         if [ "${{ env.version }}" != "${{ env.latest_release }}" ]; then
@@ -47,27 +41,37 @@ jobs:
           echo "new_version=false" >> $GITHUB_ENV
         fi
 
-    - name: Build project
+    - name: Install .NET
+      uses: actions/setup-dotnet@v2
+      if: env.new_version == 'true'
+      with:
+        dotnet-version: '8.0.x'
+  
+    - name: Install Dependencies
+      if: env.new_version == 'true'
+      run: dotnet restore
+
+    - name: Build ${{ env.REPOSITORY_NAME }}
       if: env.new_version == 'true'
       run: dotnet publish -c Release
 
-    - name: Rename release directory
+    - name: Prepare Release
       if: env.new_version == 'true'
       run: |
         mv /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0/publish/ /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0/${{ env.REPOSITORY_FOLDER }}/
 
-    - name: Zip release
+    - name: Compress Release
       if: env.new_version == 'true'
       run: cd /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0 && zip -r /home/runner/work/${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip ${{ env.REPOSITORY_FOLDER }}
 
-    - name: Get release notes
+    - name: Build Release Notes
       if: env.new_version == 'true'
       id: get_release_notes
       run: |
         release_notes=$(git log --pretty=format:"[%h](https://github.com/${{ github.repository }}/commit/%H) - %s (%an)" $(git describe --tags --abbrev=0)..HEAD)
         echo "release_notes=$release_notes" >> $GITHUB_ENV
 
-    - name: Create GitHub release
+    - name: Add Release on Github
       id: create_release
       if: env.new_version == 'true'
       uses: actions/create-release@v1
@@ -80,13 +84,13 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload release asset
+    - name: Upload ${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
       if: env.new_version == 'true'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /home/runner/work/{{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
+        asset_path: /home/runner/work/${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
         asset_name: ${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip
         asset_content_type: application/zip
