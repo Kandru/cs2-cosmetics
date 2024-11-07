@@ -26,10 +26,10 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
-    - name: Get current version from {{ env.REPOSITORY_FOLDER }}.cs
+    - name: Get current version from ${{ env.REPOSITORY_FOLDER }}.cs
       id: get_version
       run: |
-        version=$(grep -oP '(?<=ModuleVersion => ")[^"]*' {{ env.REPOSITORY_FOLDER }}/{{ env.REPOSITORY_FOLDER }}.cs)
+        version=$(grep -oP '(?<=ModuleVersion => ")[^"]*' ${{ env.REPOSITORY_FOLDER }}/${{ env.REPOSITORY_FOLDER }}.cs)
         echo "version=$version" >> $GITHUB_ENV
 
     - name: Get latest release version
@@ -54,11 +54,11 @@ jobs:
     - name: Rename release directory
       if: env.new_version == 'true'
       run: |
-        mv /home/runner/work/{{ env.REPOSITORY_NAME }}/{{ env.REPOSITORY_NAME }}/{{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0/publish/ /home/runner/work/{{ env.REPOSITORY_NAME }}/{{ env.REPOSITORY_NAME }}/{{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0/{{ env.REPOSITORY_FOLDER }}/
+        mv /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0/publish/ /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0/${{ env.REPOSITORY_FOLDER }}/
 
     - name: Zip release
       if: env.new_version == 'true'
-      run: cd /home/runner/work/{{ env.REPOSITORY_NAME }}/{{ env.REPOSITORY_NAME }}/{{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0 && zip -r /home/runner/work/{{ env.REPOSITORY_NAME }}-${{ env.version }}.zip {{ env.REPOSITORY_FOLDER }}
+      run: cd /home/runner/work/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_FOLDER }}/bin/Release/net8.0 && zip -r /home/runner/work/${{ env.REPOSITORY_NAME }}-${{ env.version }}.zip ${{ env.REPOSITORY_FOLDER }}
 
     - name: Get release notes
       if: env.new_version == 'true'
