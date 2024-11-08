@@ -7,7 +7,7 @@ namespace Cosmetics
     {
         public override string ModuleName => "Cosmetics";
         public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
-        public override string ModuleVersion => "1.0.0";
+        public override string ModuleVersion => "1.0.1";
 
         private string _currentMap = "";
         private Random _random = new Random();
