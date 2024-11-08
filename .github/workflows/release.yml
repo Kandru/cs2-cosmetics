@@ -8,6 +8,7 @@ on:
 
 env:
   REPOSITORY_FOLDER: "src" # subfolder with source code
+  REPOSITORY_MAIN_FILE: "Cosmetics.cs" # main file of the project
 
 jobs:
   create-release:
@@ -20,10 +21,10 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Get Current Project Version Number From ${{ env.REPOSITORY_FOLDER }}.cs
+    - name: Get Current Project Version Number From ${{ env.REPOSITORY_MAIN_FILE }}
       id: get_version
       run: |
-        version=$(grep -oP '(?<=ModuleVersion => ")[^"]*' ${{ env.REPOSITORY_FOLDER }}/${{ env.REPOSITORY_FOLDER }}.cs)
+        version=$(grep -oP '(?<=ModuleVersion => ")[^"]*' ${{ env.REPOSITORY_FOLDER }}/${{ env.REPOSITORY_MAIN_FILE }})
         echo "version=$version" >> $GITHUB_ENV
 
     - name: Get Current Release Version Number
