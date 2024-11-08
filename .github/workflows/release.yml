@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  REPOSITORY_FOLDER: "Cosmetics" # subfolder with source code
+  REPOSITORY_FOLDER: "src" # subfolder with source code
 
 jobs:
   create-release:
