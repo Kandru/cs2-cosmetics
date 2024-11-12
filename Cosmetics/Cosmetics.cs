@@ -40,6 +40,7 @@ namespace Cosmetics
             RegisterListener<Listeners.OnMapStart>(OnMapStart);
             RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
             InitializeColoredSmokeGrenades();
+            InitializeDeathBeams();
         }
 
         public void RemoveListeners()
