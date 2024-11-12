@@ -7,6 +7,14 @@ namespace Cosmetics
 {
     public partial class Cosmetics : BasePlugin
     {
+        private List<string> _deathbeamIgnoreWeapons = new List<string> {
+            "hegrenade",
+            "knife",
+            "knife_t",
+            "knife_ct",
+            "env_fire",
+        };
+
         private void InitializeDeathBeams()
         {
             RegisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
@@ -18,10 +26,12 @@ namespace Cosmetics
             CCSPlayerController victim = @event.Userid!;
             if (attacker == null || victim == null
                 || attacker.Pawn == null || !attacker.Pawn.IsValid || attacker.Pawn.Value == null
-                || victim.Pawn == null || !victim.Pawn.IsValid || victim.Pawn.Value == null) return HookResult.Continue;
+                || victim.Pawn == null || !victim.Pawn.IsValid || victim.Pawn.Value == null
+                || _deathbeamIgnoreWeapons.Contains(@event.Weapon)) return HookResult.Continue;
+
             Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
             Vector victimEyePos = victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
-            CreateBeam(attackerEyePos, victimEyePos, attacker.Team, 1f, 2f);
+            CreateBeam(attackerEyePos, victimEyePos, attacker.Team, 0.5f, 1f);
             return HookResult.Continue;
         }
 
