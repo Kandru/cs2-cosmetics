@@ -15,9 +15,20 @@ namespace Cosmetics
             "env_fire",
         };
 
+        private Dictionary<CCSPlayerController, Vector> _deathbeamLastBulletImpact = new();
+
         private void InitializeDeathBeams()
         {
             RegisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
+            RegisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
+        }
+
+        private HookResult DeathBeamsOnBulletImpact(EventBulletImpact @event, GameEventInfo info)
+        {
+            CCSPlayerController attacker = @event.Userid!;
+            if (attacker == null) return HookResult.Continue;
+            _deathbeamLastBulletImpact[attacker] = new Vector(@event.X, @event.Y, @event.Z);
+            return HookResult.Continue;
         }
 
         private HookResult DeathBeamsOnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
@@ -25,13 +36,14 @@ namespace Cosmetics
             CCSPlayerController attacker = @event.Attacker!;
             CCSPlayerController victim = @event.Userid!;
             if (attacker == null || victim == null
-                || attacker.Pawn == null || !attacker.Pawn.IsValid || attacker.Pawn.Value == null
-                || victim.Pawn == null || !victim.Pawn.IsValid || victim.Pawn.Value == null
+                || attacker.Pawn == null || !attacker.Pawn.IsValid || attacker.Pawn.Value == null || attacker.Pawn.Value.CameraServices == null
+                || victim.Pawn == null || !victim.Pawn.IsValid || victim.Pawn.Value == null || victim.Pawn.Value.CameraServices == null
                 || _deathbeamIgnoreWeapons.Contains(@event.Weapon)) return HookResult.Continue;
-
-            Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
-            Vector victimEyePos = victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
-            CreateBeam(attackerEyePos, victimEyePos, attacker.Team, 0.5f, 1f);
+            // create beam from attackers eye position
+            Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ - 5);
+            // set end of beam to last bullet impact position if available
+            Vector victimHitVector = _deathbeamLastBulletImpact.ContainsKey(attacker) ? _deathbeamLastBulletImpact[attacker] : victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
+            CreateBeam(attackerEyePos, victimHitVector, attacker.Team, 0.5f, 1.5f);
             return HookResult.Continue;
         }
 
