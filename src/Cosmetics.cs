@@ -15,50 +15,66 @@ namespace Cosmetics
         {
             // initialize configuration
             LoadConfig();
-            SaveConfig();
-            RegisterListeners();
-            // print message if hot reload
             if (hotReload)
             {
                 // set current map
                 _currentMap = Server.MapName;
                 // initialize configuration
                 InitializeConfig(_currentMap);
+                // register listeners
+                RegisterListeners(true);
             }
+            // save configuration
+            SaveConfig();
         }
 
         public override void Unload(bool hotReload)
         {
-            RemoveListeners();
+            RemoveListeners(true);
             Console.WriteLine(Localizer["core.unload"]);
         }
 
-        public void RegisterListeners()
+        public void RegisterListeners(bool complete = false)
         {
-            RegisterListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
-            RegisterListener<Listeners.OnMapStart>(OnMapStart);
-            RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
+            if (!Config.Enabled) return;
+            if (complete)
+            {
+                RegisterListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
+                RegisterListener<Listeners.OnMapStart>(OnMapStart);
+                RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
+            }
             InitializeColoredSmokeGrenades();
             InitializeDeathBeams();
         }
 
-        public void RemoveListeners()
+        public void RemoveListeners(bool complete = false)
         {
-            RemoveListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
-            RemoveListener<Listeners.OnMapStart>(OnMapStart);
-            RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
+            if (complete)
+            {
+                RemoveListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
+                RemoveListener<Listeners.OnMapStart>(OnMapStart);
+                RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
+            }
             ResetColoredSmokeGrenades();
+            ResetDeathBeams();
         }
 
         private void OnMapStart(string mapName)
         {
             // set current map
             _currentMap = mapName;
+            // initialize configuration
+            LoadConfig();
+            InitializeConfig(mapName);
+            // save configuration
+            SaveConfig();
+            // register listeners
+            RegisterListeners();
         }
 
         private void OnMapEnd()
         {
-
+            RemoveListeners();
         }
     }
 }

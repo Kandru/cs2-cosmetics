@@ -8,14 +8,16 @@ namespace Cosmetics
 {
     public class MapConfig
     {
-        // disabled
-        [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        [JsonPropertyName("enable_coloredsmokegrenades")] public bool EnableColoredSmokeGrenades { get; set; } = true;
+        [JsonPropertyName("enable_deathbeam")] public bool EnableDeathBeam { get; set; } = true;
     }
 
     public class PluginConfig : BasePluginConfig
     {
-        // disabled
+        // global settings
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        [JsonPropertyName("enable_coloredsmokegrenades")] public bool EnableColoredSmokeGrenades { get; set; } = true;
+        [JsonPropertyName("enable_deathbeam")] public bool EnableDeathBeam { get; set; } = true;
         // map configurations
         [JsonPropertyName("maps")] public Dictionary<string, MapConfig> MapConfigs { get; set; } = new Dictionary<string, MapConfig>();
     }

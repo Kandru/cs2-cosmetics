@@ -19,8 +19,18 @@ namespace Cosmetics
 
         private void InitializeDeathBeams()
         {
+            if (!Config.EnableDeathBeam) return;
+            if (_currentMap == "") return;
+            var mapConfig = Config.MapConfigs[_currentMap];
+            if (!mapConfig.EnableDeathBeam) return;
             RegisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
             RegisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
+        }
+
+        private void ResetDeathBeams()
+        {
+            DeregisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
+            DeregisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
         }
 
         private HookResult DeathBeamsOnBulletImpact(EventBulletImpact @event, GameEventInfo info)

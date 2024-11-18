@@ -29,6 +29,30 @@ Updating is even easier: simply overwrite all plugin files and they will be relo
 
 This plugin automatically creates a readable JSON configuration file. This configuration file can be found in `/addons/counterstrikesharp/configs/plugins/Cosmetics/Cosmetics.json`.
 
+```json
+{
+  "enabled": true,
+  "enable_coloredsmokegrenades": true,
+  "enable_deathbeam": true,
+  "maps": {
+    "de_dust2": {
+      "enable_coloredsmokegrenades": true,
+      "enable_deathbeam": true
+    }
+  },
+  "ConfigVersion": 1
+}
+```
+
+### enabled
+Wether or not this plugin is enabled globally.
+
+### enable_coloredsmokegrenades
+Disables the colored smoke grenades either globally or per map.
+
+### enable_deathbeam
+Disables the death beam either globally or per map.
+
 ## Compile Yourself
 
 Clone the project:
