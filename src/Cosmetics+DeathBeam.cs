@@ -38,6 +38,7 @@ namespace Cosmetics
             if (attacker == null || victim == null
                 || attacker.Pawn == null || !attacker.Pawn.IsValid || attacker.Pawn.Value == null || attacker.Pawn.Value.CameraServices == null
                 || victim.Pawn == null || !victim.Pawn.IsValid || victim.Pawn.Value == null || victim.Pawn.Value.CameraServices == null
+                || attacker.Index == victim.Index
                 || _deathbeamIgnoreWeapons.Contains(@event.Weapon)) return HookResult.Continue;
             // create beam from attackers eye position
             Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ - 5);
