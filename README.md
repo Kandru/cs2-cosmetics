@@ -34,10 +34,12 @@ This plugin automatically creates a readable JSON configuration file. This confi
   "enabled": true,
   "enable_coloredsmokegrenades": true,
   "enable_deathbeam": true,
+  "enable_specatormodel": true,
   "maps": {
     "de_dust2": {
       "enable_coloredsmokegrenades": true,
-      "enable_deathbeam": true
+      "enable_deathbeam": true,
+      "enable_specatormodel": true,
     }
   },
   "ConfigVersion": 1
