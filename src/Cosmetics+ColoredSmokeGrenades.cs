@@ -10,7 +10,7 @@ namespace Cosmetics
         private void InitializeColoredSmokeGrenades()
         {
             if (!Config.EnableColoredSmokeGrenades) return;
-            if (_currentMap == "") return;
+            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
             var mapConfig = Config.MapConfigs[_currentMap];
             if (!mapConfig.EnableColoredSmokeGrenades) return;
             RegisterListener<Listeners.OnEntitySpawned>(ColoredSmokeGrenadesOnEntitySpawned);

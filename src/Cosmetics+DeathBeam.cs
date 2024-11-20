@@ -20,7 +20,7 @@ namespace Cosmetics
         private void InitializeDeathBeams()
         {
             if (!Config.EnableDeathBeam) return;
-            if (_currentMap == "") return;
+            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
             var mapConfig = Config.MapConfigs[_currentMap];
             if (!mapConfig.EnableDeathBeam) return;
             RegisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);

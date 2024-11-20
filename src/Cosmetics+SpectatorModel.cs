@@ -12,7 +12,7 @@ namespace Cosmetics
         private void InitializeSpectatorModel()
         {
             if (!Config.EnableSpectatorModel) return;
-            if (_currentMap == "") return;
+            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
             var mapConfig = Config.MapConfigs[_currentMap];
             if (!mapConfig.EnableSpectatorModel) return;
             RegisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
