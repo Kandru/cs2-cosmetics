@@ -37,7 +37,7 @@ namespace Cosmetics
             return (int)prop.Index;
         }
 
-        private void UpdateProp(CCSPlayerController player, int index, int offset_z = 0, int offset_angle = 0)
+        private bool UpdateProp(CCSPlayerController player, int index, int offset_z = 0, int offset_angle = 0)
         {
             var prop = Utilities.GetEntityFromIndex<CDynamicProp>((int)index);
             // sanity checks
@@ -45,7 +45,7 @@ namespace Cosmetics
             || player == null
             || player.Pawn == null
             || player.Pawn.Value == null
-            || !player.Pawn.IsValid) return;
+            || !player.Pawn.IsValid) return false;
             // get player pawn
             var playerPawn = player!.Pawn!.Value;
             // teleport it to player
@@ -72,8 +72,9 @@ namespace Cosmetics
             if (playerOrigin.X == propOrigin.X
                 && playerOrigin.Y == propOrigin.Y
                 && playerOrigin.Z == propOrigin.Z
-                && playerRotation.Y == propRotation.Y) return;
+                && playerRotation.Y == propRotation.Y) return true;
             prop.Teleport(playerOrigin, playerRotation);
+            return true;
         }
 
         private void RemoveProp(int index, bool softRemove = false)

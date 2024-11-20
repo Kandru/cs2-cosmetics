@@ -1,5 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 
 namespace Cosmetics
 {
@@ -14,16 +15,21 @@ namespace Cosmetics
             if (_currentMap == "") return;
             var mapConfig = Config.MapConfigs[_currentMap];
             if (!mapConfig.EnableSpectatorModel) return;
-            RegisterListener<Listeners.OnTick>(EventSpectatorModelOnTick);
+            RegisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
+            RegisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);
         }
 
         private void ResetSpectatorModel()
         {
             RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
             RemoveListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
+            DeregisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
+            DeregisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);
+            _spectatorModelPlayers.Clear();
         }
         private void EventSpectatorModelOnTick()
         {
+            bool hasSpectators = false;
             foreach (CCSPlayerController player in Utilities.GetPlayers())
             {
                 try
@@ -32,13 +38,19 @@ namespace Cosmetics
                     if (player == null
                     || player.Pawn == null
                     || player.Pawn.Value == null
-                    || !player.Pawn.IsValid) continue;
-                    if (!_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD
-                         && player.Pawn.Value.ObserverServices != null
-                         && player.Pawn.Value.ObserverServices.ObserverMode == (byte)ObserverMode_t.OBS_MODE_ROAMING)
+                    || !player.Pawn.IsValid
+                    || (player.Team != CsTeam.Spectator && !_spectatorModelPlayers.ContainsKey(player))
+                    ) continue;
+                    // initial spawn
+                    if (!_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
                     {
-                        Console.WriteLine("Spawning spectator model for player: " + player.PlayerName);
+                        hasSpectators = true;
+                        // continue if player is currently not in correct roaming mode
+                        if (player.Pawn.Value.ObserverServices == null
+                            || player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING) continue;
+                        // start transmission if nobody else has yet
                         if (_spectatorModelPlayers.Count == 0) RegisterListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
+                        // spawn prop
                         _spectatorModelPlayers.Add(player,
                             SpawnProp(
                                 player,
@@ -50,7 +62,7 @@ namespace Cosmetics
                         && (player.Pawn.Value.LifeState != (byte)LifeState_t.LIFE_DEAD
                         || (player.Pawn.Value.ObserverServices != null && player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)))
                     {
-                        Console.WriteLine("Removing spectator model for player: " + player.PlayerName);
+                        hasSpectators = true;
                         RemoveProp(
                             _spectatorModelPlayers[player],
                             true
@@ -59,12 +71,16 @@ namespace Cosmetics
                     }
                     else if (_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
                     {
-                        UpdateProp(
+                        if (!UpdateProp(
                             player,
                             _spectatorModelPlayers[player],
-                            0,
+                            -1,
                             0
-                        );
+                        ))
+                        {
+                            hasSpectators = true;
+                            _spectatorModelPlayers.Remove(player);
+                        }
                     }
                 }
                 catch (Exception e)
@@ -72,6 +88,10 @@ namespace Cosmetics
                     // log error
                     Console.WriteLine(Localizer["core.error"].Value.Replace("{error}", e.Message));
                 }
+            }
+            if (_spectatorModelPlayers.Count() == 0 && !hasSpectators)
+            {
+                RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
             }
         }
 
@@ -92,6 +112,33 @@ namespace Cosmetics
                 if (prop == null) continue;
                 info.TransmitEntities.Remove(prop);
             }
+        }
+
+        private HookResult EventSpectatorModelOnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+        {
+            if (@event.Team == (byte)CsTeam.Spectator)
+            {
+                // start listener if the first player joined spectator team
+                if (_spectatorModelPlayers.Count() == 0)
+                {
+                    RegisterListener<Listeners.OnTick>(EventSpectatorModelOnTick);
+                }
+            }
+            return HookResult.Continue;
+        }
+
+        private HookResult EventSpectatorModelOnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+        {
+            CCSPlayerController player = @event.Userid!;
+            if (_spectatorModelPlayers.ContainsKey(player))
+            {
+                RemoveProp(
+                    _spectatorModelPlayers[player],
+                    true
+                );
+                _spectatorModelPlayers.Remove(player);
+            }
+            return HookResult.Continue;
         }
     }
 }
