@@ -10,6 +10,8 @@ namespace Cosmetics
     {
         [JsonPropertyName("enable_coloredsmokegrenades")] public bool EnableColoredSmokeGrenades { get; set; } = true;
         [JsonPropertyName("enable_deathbeam")] public bool EnableDeathBeam { get; set; } = true;
+        [JsonPropertyName("enable_lighting")] public bool EnableLighting { get; set; } = true;
+        [JsonPropertyName("enable_specatormodel")] public bool EnableSpectatorModel { get; set; } = true;
     }
 
     public class PluginConfig : BasePluginConfig
@@ -18,6 +20,8 @@ namespace Cosmetics
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
         [JsonPropertyName("enable_coloredsmokegrenades")] public bool EnableColoredSmokeGrenades { get; set; } = true;
         [JsonPropertyName("enable_deathbeam")] public bool EnableDeathBeam { get; set; } = true;
+        [JsonPropertyName("enable_lighting")] public bool EnableLighting { get; set; } = true;
+        [JsonPropertyName("enable_specatormodel")] public bool EnableSpectatorModel { get; set; } = true;
         // map configurations
         [JsonPropertyName("maps")] public Dictionary<string, MapConfig> MapConfigs { get; set; } = new Dictionary<string, MapConfig>();
     }

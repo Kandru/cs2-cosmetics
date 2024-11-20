@@ -7,6 +7,7 @@ namespace Cosmetics
     {
         private readonly List<string> _precacheModels = new List<string>
         {
+            "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl"
         };
 
         private void OnServerPrecacheResources(ResourceManifest manifest)

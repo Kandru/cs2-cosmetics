@@ -45,6 +45,7 @@ namespace Cosmetics
             }
             InitializeColoredSmokeGrenades();
             InitializeDeathBeams();
+            InitializeSpectatorModel();
         }
 
         public void RemoveListeners(bool complete = false)
@@ -57,6 +58,7 @@ namespace Cosmetics
             }
             ResetColoredSmokeGrenades();
             ResetDeathBeams();
+            ResetSpectatorModel();
         }
 
         private void OnMapStart(string mapName)
