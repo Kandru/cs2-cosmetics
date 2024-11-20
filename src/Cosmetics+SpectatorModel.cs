@@ -55,7 +55,7 @@ namespace Cosmetics
                             SpawnProp(
                                 player,
                                 _spectatorModel,
-                                0.01f
+                                0.02f
                         ));
                     }
                     else if (_spectatorModelPlayers.ContainsKey(player)
