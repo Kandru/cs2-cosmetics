@@ -68,6 +68,22 @@ namespace Cosmetics
             Console.WriteLine(Localizer["core.foundconfig"].Value.Replace("{count}", _currentMapConfigs.Length.ToString()).Replace("{mapName}", mapName));
         }
 
+        public void UpdateConfig()
+        {
+            // look for the current map config and add missing keys (if any) - compare with default values
+            foreach (var mapConfig in _currentMapConfigs)
+            {
+                var defaultConfig = new MapConfig();
+                foreach (var property in typeof(MapConfig).GetProperties())
+                {
+                    if (property.GetValue(mapConfig) == null)
+                    {
+                        property.SetValue(mapConfig, property.GetValue(defaultConfig));
+                    }
+                }
+            }
+        }
+
         public void OnConfigParsed(PluginConfig config)
         {
             Config = config;

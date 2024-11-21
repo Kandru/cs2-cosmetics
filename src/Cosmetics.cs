@@ -18,12 +18,14 @@ namespace Cosmetics
             if (hotReload)
             {
                 // set current map
-                _currentMap = Server.MapName;
+                _currentMap = Server.MapName.ToLower();
                 // initialize configuration
                 InitializeConfig(_currentMap);
                 // register listeners
                 RegisterListeners(true);
             }
+            // update configuration
+            UpdateConfig();
             // save configuration
             SaveConfig();
         }
@@ -64,10 +66,12 @@ namespace Cosmetics
         private void OnMapStart(string mapName)
         {
             // set current map
-            _currentMap = mapName;
+            _currentMap = mapName.ToLower();
             // initialize configuration
             LoadConfig();
-            InitializeConfig(mapName);
+            InitializeConfig(_currentMap);
+            // update configuration
+            UpdateConfig();
             // save configuration
             SaveConfig();
             // register listeners
