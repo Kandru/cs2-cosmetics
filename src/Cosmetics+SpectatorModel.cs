@@ -1,6 +1,8 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
+using System.Drawing;
 
 namespace Cosmetics
 {
@@ -74,7 +76,7 @@ namespace Cosmetics
                         if (!UpdateProp(
                             player,
                             _spectatorModelPlayers[player],
-                            -1,
+                            -10,
                             0
                         ))
                         {
@@ -139,6 +141,126 @@ namespace Cosmetics
                 _spectatorModelPlayers.Remove(player);
             }
             return HookResult.Continue;
+        }
+
+        private int SpawnProp(CCSPlayerController player, string model, float scale = 1.0f)
+        {
+            // sanity checks
+            if (player == null
+            || player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null) return -1;
+            // create dynamic prop
+            CDynamicProp prop;
+            prop = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic_override")!;
+            // set attributes
+            prop.MoveType = MoveType_t.MOVETYPE_NOCLIP;
+            prop.Collision.SolidType = SolidType_t.SOLID_NONE;
+            prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
+            prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
+            // spawn it
+            prop.DispatchSpawn();
+            prop.SetModel(model);
+            prop.Teleport(new Vector(-999, -999, -999));
+            // set random color
+            prop.Render = Color.FromArgb(
+                255,
+                (byte)_random.Next(0, 255),
+                (byte)_random.Next(0, 255),
+                (byte)_random.Next(0, 255)
+            );
+            prop.AnimGraphUpdateEnabled = false;
+            prop.CBodyComponent!.SceneNode!.Scale = scale;
+            return (int)prop.Index;
+        }
+
+        private bool UpdateProp(CCSPlayerController player, int index, int offset_z = 0, int offset_angle = 0)
+        {
+            var prop = Utilities.GetEntityFromIndex<CDynamicProp>((int)index);
+            // sanity checks
+            if (prop == null
+            || prop.AbsRotation == null
+            || player == null
+            || player.Pawn == null
+            || player.Pawn.Value == null
+            || !player.Pawn.IsValid) return false;
+            // get player pawn
+            var playerPawn = player!.Pawn!.Value;
+            float maxSpeed = 0.8f;
+            // set player max speed
+            playerPawn.AbsVelocity.X *= maxSpeed;
+            playerPawn.AbsVelocity.Y *= maxSpeed;
+            playerPawn.AbsVelocity.Z *= maxSpeed;
+            // calculate tilt based on player's movement and angle
+            float tiltSpeed = 1.0f; // Speed at which tilt angle is adjusted
+            float maxTiltAngle = 55.0f; // Maximum tilt angle in degrees
+            float maxSpeedForFullTilt = 2.0f; // Speed at which full tilt is achieved
+            float tiltAngle;
+            float targetTiltAngle;
+            float currentTiltAngle = prop.AbsRotation.Z;
+            // Calculate the difference in angle
+            float angleDifference = playerPawn.V_angle.Y - playerPawn.V_anglePrevious.Y;
+            // Determine target tilt angle based on player's look direction and speed
+            if (Math.Abs(angleDifference) > 0.1f) // Check if player is looking left or right
+            {
+                float speedFactor = Math.Clamp(Math.Abs(angleDifference) / maxSpeedForFullTilt, 0.0f, 1.0f);
+                targetTiltAngle = maxTiltAngle * speedFactor * -Math.Sign(angleDifference);
+            }
+            else
+            {
+                targetTiltAngle = 0; // Player is not moving, reset tilt angle
+            }
+            // Smoothly adjust tilt angle to target tilt angle
+            if (currentTiltAngle < targetTiltAngle)
+            {
+                tiltAngle = Math.Min(currentTiltAngle + tiltSpeed, targetTiltAngle); // Adjust tilt angle positively
+            }
+            else if (currentTiltAngle > targetTiltAngle)
+            {
+                tiltAngle = Math.Max(currentTiltAngle - tiltSpeed, targetTiltAngle); // Adjust tilt angle negatively
+            }
+            else
+            {
+                tiltAngle = currentTiltAngle; // No change needed
+            }
+            // build vectors
+            Vector playerOrigin = new Vector(
+                (float)Math.Round(playerPawn.AbsOrigin!.X, 5),
+                (float)Math.Round(playerPawn.AbsOrigin!.Y, 5),
+                (float)Math.Round(playerPawn.AbsOrigin!.Z, 5) + offset_z
+            );
+            Vector propOrigin = new Vector(
+                (float)Math.Round(prop.AbsOrigin!.X, 5),
+                (float)Math.Round(prop.AbsOrigin!.Y, 5),
+                (float)Math.Round(prop.AbsOrigin!.Z, 5)
+            );
+            QAngle playerRotation = new QAngle(
+                (float)Math.Round(playerPawn.V_angle!.X, 5),
+                (float)Math.Round(playerPawn.V_angle!.Y, 5) + offset_angle,
+                tiltAngle
+            );
+            QAngle propRotation = new QAngle(
+                0,
+                (float)Math.Round(prop.AbsRotation!.Y, 5),
+                0
+            );
+            // check if vectors changed enough to avoid frequent updates
+            if (playerOrigin.X == propOrigin.X
+                && playerOrigin.Y == propOrigin.Y
+                && playerOrigin.Z == propOrigin.Z
+                && playerRotation.Y == propRotation.Y) return true;
+            prop.Teleport(playerOrigin, playerRotation);
+            return true;
+        }
+
+        private void RemoveProp(int index, bool softRemove = false)
+        {
+            var prop = Utilities.GetEntityFromIndex<CDynamicProp>((int)index);
+            // remove plant entity
+            if (prop == null)
+                return;
+            if (softRemove)
+                prop.Teleport(new Vector(-999, -999, -999));
+            else
+                prop.Remove();
         }
     }
 }
