@@ -13,6 +13,8 @@ namespace Cosmetics
 
         public override void Load(bool hotReload)
         {
+            // register listeners
+            RegisterListeners(true);
             // initialize configuration
             LoadConfig();
             if (hotReload)
@@ -21,8 +23,6 @@ namespace Cosmetics
                 _currentMap = Server.MapName.ToLower();
                 // initialize configuration
                 InitializeConfig(_currentMap);
-                // register listeners
-                RegisterListeners(true);
             }
             // update configuration
             UpdateConfig();
