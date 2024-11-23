@@ -184,7 +184,7 @@ namespace Cosmetics
             || !player.Pawn.IsValid) return false;
             // get player pawn
             var playerPawn = player!.Pawn!.Value;
-            float maxSpeed = 0.8f;
+            float maxSpeed = 0.9f;
             // set player max speed
             playerPawn.AbsVelocity.X *= maxSpeed;
             playerPawn.AbsVelocity.Y *= maxSpeed;
