@@ -29,8 +29,6 @@ namespace Cosmetics
 
         private void ResetDeathBeams()
         {
-            DeregisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
-            DeregisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
         }
 
         private HookResult DeathBeamsOnBulletImpact(EventBulletImpact @event, GameEventInfo info)

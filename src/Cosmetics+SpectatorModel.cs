@@ -25,8 +25,6 @@ namespace Cosmetics
         {
             RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
             RemoveListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
-            DeregisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
-            DeregisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);
             _spectatorModelPlayers.Clear();
         }
         private void EventSpectatorModelOnTick()
