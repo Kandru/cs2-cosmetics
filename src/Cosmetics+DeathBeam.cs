@@ -8,11 +8,25 @@ namespace Cosmetics
     public partial class Cosmetics : BasePlugin
     {
         private List<string> _deathbeamIgnoreWeapons = new List<string> {
-            "hegrenade",
-            "knife",
-            "knife_t",
-            "knife_ct",
+            "weapon_hegrenade",
+            "weapon_molotov",
+            "weapon_decoy",
+            "weapon_flashbang",
+            "weapon_incgrenade",
+            "weapon_tagrenade",
+            "weapon_taser",
+            "weapon_smokegrenade",
+            "weapon_breachcharge",
+            "weapon_bumpmine",
+            "weapon_shield",
+            "weapon_melee",
+            "weapon_knife",
+            "weapon_knife_t",
+            "weapon_knife_ct",
             "env_fire",
+            "weapon_c4",
+            "weapon_bomb",
+            "weapon_tripwirefire",
         };
 
         private Dictionary<CCSPlayerController, Vector> _deathbeamLastBulletImpact = new();
