@@ -8,6 +8,7 @@ namespace Cosmetics
 {
     public class MapConfig
     {
+        [JsonPropertyName("enable_bombmodel")] public bool EnableBombModel { get; set; } = true;
         [JsonPropertyName("enable_coloredsmokegrenades")] public bool EnableColoredSmokeGrenades { get; set; } = true;
         [JsonPropertyName("enable_deathbeam")] public bool EnableDeathBeam { get; set; } = true;
         [JsonPropertyName("enable_lighting")] public bool EnableLighting { get; set; } = true;
@@ -18,6 +19,7 @@ namespace Cosmetics
     {
         // global settings
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        [JsonPropertyName("enable_bombmodel")] public bool EnableBombModel { get; set; } = true;
         [JsonPropertyName("enable_coloredsmokegrenades")] public bool EnableColoredSmokeGrenades { get; set; } = true;
         [JsonPropertyName("enable_deathbeam")] public bool EnableDeathBeam { get; set; } = true;
         [JsonPropertyName("enable_lighting")] public bool EnableLighting { get; set; } = true;
