@@ -26,7 +26,7 @@ namespace Cosmetics
                 var bombEntities = Utilities.FindAllEntitiesByDesignerName<CPlantedC4>("planted_c4");
                 foreach (var bombEntity in bombEntities)
                 {
-                    bombEntity.CBodyComponent!.SceneNode!.Scale = 3f;
+                    bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().Scale = 3f;
                 }
             });
             return HookResult.Continue;
