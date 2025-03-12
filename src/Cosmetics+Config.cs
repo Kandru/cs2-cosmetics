@@ -6,6 +6,8 @@ namespace Cosmetics
     public class BombModelConfig
     {
         [JsonPropertyName("enable")] public bool Enable { get; set; } = true;
+        [JsonPropertyName("min_size")] public float MinSize { get; set; } = 3f;
+        [JsonPropertyName("max_size")] public float MaxSize { get; set; } = 7f;
     }
 
     public class ColoredSmokeGrenadesConfig

@@ -30,7 +30,17 @@ namespace Cosmetics
                 var bombEntities = Utilities.FindAllEntitiesByDesignerName<CPlantedC4>("planted_c4");
                 foreach (var bombEntity in bombEntities)
                 {
-                    bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().Scale = 10f;
+                    float randomScale = 3.0f;
+                    if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower()))
+                    {
+                        var mapConfig = Config.MapConfigs[Server.MapName.ToLower()];
+                        randomScale = (float)(new Random().NextDouble() * (mapConfig.BombModel.MaxSize - mapConfig.BombModel.MinSize) + mapConfig.BombModel.MinSize);
+                    }
+                    else
+                    {
+                        randomScale = (float)(new Random().NextDouble() * (Config.Global.BombModel.MaxSize - Config.Global.BombModel.MinSize) + Config.Global.BombModel.MinSize);
+                    }
+                    bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().Scale = randomScale;
                 }
             });
             return HookResult.Continue;
