@@ -14,10 +14,11 @@ namespace Cosmetics
         private void InitializeSpectatorModel()
         {
             // disable if globally disabled
-            if (!Config.Global.BombModel.Enable) return;
+            if (!Config.Global.SpectatorModel.Enable) return;
             // disable if map specific disabled
-            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
-                && !Config.MapConfigs[Server.MapName.ToLower()].BombModel.Enable) return;
+            if (Config.MapConfigs == null || Server.MapName == null ||
+                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].SpectatorModel.Enable)) return;
             // register event handlers
             RegisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
             RegisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);

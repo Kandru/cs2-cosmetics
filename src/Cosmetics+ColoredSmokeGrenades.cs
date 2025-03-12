@@ -12,8 +12,9 @@ namespace Cosmetics
             // disable if globally disabled
             if (!Config.Global.ColoredSmokeGrenades.Enable) return;
             // disable if map specific disabled
-            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
-                && !Config.MapConfigs[Server.MapName.ToLower()].ColoredSmokeGrenades.Enable) return;
+            if (Config.MapConfigs == null || Server.MapName == null ||
+                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].ColoredSmokeGrenades.Enable)) return;
             // register event handler
             RegisterListener<Listeners.OnEntitySpawned>(ColoredSmokeGrenadesOnEntitySpawned);
         }
