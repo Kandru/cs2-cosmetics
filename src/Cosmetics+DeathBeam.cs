@@ -33,16 +33,19 @@ namespace Cosmetics
 
         private void InitializeDeathBeams()
         {
-            if (!Config.EnableDeathBeam) return;
-            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
-            var mapConfig = Config.MapConfigs[_currentMap];
-            if (!mapConfig.EnableDeathBeam) return;
+            // disable if globally disabled
+            if (!Config.Global.DeathBeam.Enable) return;
+            // disable if map specific disabled
+            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].DeathBeam.Enable) return;
+            // register event handlers
             RegisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
             RegisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
         }
 
         private void ResetDeathBeams()
         {
+            // unregister event handlers
             DeregisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
             DeregisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
         }
@@ -87,7 +90,8 @@ namespace Cosmetics
             Utilities.SetStateChanged(beam, "CBeam", "m_vecEndPos");
             AddTimer(timeout, () =>
             {
-                if (beam != null && beam.IsValid) beam.Remove();
+                if (beam != null && beam.IsValid)
+                    beam.Remove();
             });
         }
     }

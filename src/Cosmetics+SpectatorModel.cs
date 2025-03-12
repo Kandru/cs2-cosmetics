@@ -13,16 +13,19 @@ namespace Cosmetics
 
         private void InitializeSpectatorModel()
         {
-            if (!Config.EnableSpectatorModel) return;
-            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
-            var mapConfig = Config.MapConfigs[_currentMap];
-            if (!mapConfig.EnableSpectatorModel) return;
+            // disable if globally disabled
+            if (!Config.Global.BombModel.Enable) return;
+            // disable if map specific disabled
+            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].BombModel.Enable) return;
+            // register event handlers
             RegisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
             RegisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);
         }
 
         private void ResetSpectatorModel()
         {
+            // unregister event handlers
             RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
             RemoveListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
             _spectatorModelPlayers.Clear();

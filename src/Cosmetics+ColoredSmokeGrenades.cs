@@ -9,15 +9,18 @@ namespace Cosmetics
     {
         private void InitializeColoredSmokeGrenades()
         {
-            if (!Config.EnableColoredSmokeGrenades) return;
-            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
-            var mapConfig = Config.MapConfigs[_currentMap];
-            if (!mapConfig.EnableColoredSmokeGrenades) return;
+            // disable if globally disabled
+            if (!Config.Global.ColoredSmokeGrenades.Enable) return;
+            // disable if map specific disabled
+            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].ColoredSmokeGrenades.Enable) return;
+            // register event handler
             RegisterListener<Listeners.OnEntitySpawned>(ColoredSmokeGrenadesOnEntitySpawned);
         }
 
         private void ResetColoredSmokeGrenades()
         {
+            // unregister event handler
             RemoveListener<Listeners.OnEntitySpawned>(ColoredSmokeGrenadesOnEntitySpawned);
         }
 

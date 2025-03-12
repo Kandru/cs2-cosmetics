@@ -7,20 +7,24 @@ namespace Cosmetics
     {
         private void InitializeBombModel()
         {
-            if (!Config.EnableBombModel) return;
-            if (_currentMap == "" || !Config.MapConfigs.ContainsKey(_currentMap)) return;
-            var mapConfig = Config.MapConfigs[_currentMap];
-            if (!mapConfig.EnableBombModel) return;
+            // disable if globally disabled
+            if (!Config.Global.BombModel.Enable) return;
+            // disable if map specific disabled
+            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].BombModel.Enable) return;
+            // register event handler
             RegisterEventHandler<EventBombPlanted>(BombModelOnBombPlanted);
         }
 
         private void ResetBombModel()
         {
+            // unregister event handler
             DeregisterEventHandler<EventBombPlanted>(BombModelOnBombPlanted);
         }
 
         private HookResult BombModelOnBombPlanted(EventBombPlanted @event, GameEventInfo info)
         {
+            // delay one frame to allow c4 model to exist
             Server.NextFrame(() =>
             {
                 var bombEntities = Utilities.FindAllEntitiesByDesignerName<CPlantedC4>("planted_c4");

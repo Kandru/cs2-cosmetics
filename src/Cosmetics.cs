@@ -1,5 +1,5 @@
-﻿using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Extensions;
 
 namespace Cosmetics
 {
@@ -8,81 +8,63 @@ namespace Cosmetics
         public override string ModuleName => "Cosmetics";
         public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
-        private string _currentMap = "";
         private Random _random = new Random();
 
         public override void Load(bool hotReload)
         {
-            // register listeners
-            RegisterListeners(true);
+            if (!Config.Enabled) return;
+            // register global listeners
+            RegisterListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
+            RegisterListener<Listeners.OnMapStart>(OnMapStart);
+            RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
+            // register module listeners
+            InitializeColoredSmokeGrenades();
+            InitializeDeathBeams();
+            InitializeSpectatorModel();
+            InitializeBombModel();
             // initialize configuration
-            LoadConfig();
             if (hotReload)
             {
-                // set current map
-                _currentMap = Server.MapName.ToLower();
-                // initialize configuration
-                InitializeConfig(_currentMap);
+                // reload configuration
+                Config.Reload();
+                // save configuration
+                Config.Update();
             }
-            // update configuration
-            UpdateConfig();
-            // save configuration
-            SaveConfig();
         }
 
         public override void Unload(bool hotReload)
         {
-            RemoveListeners(true);
+            // unregister global listeners
+            RemoveListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
+            RemoveListener<Listeners.OnMapStart>(OnMapStart);
+            RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
+            // unregister module listeners
+            ResetColoredSmokeGrenades();
+            ResetDeathBeams();
+            ResetSpectatorModel();
+            ResetBombModel();
             Console.WriteLine(Localizer["core.unload"]);
         }
 
-        public void RegisterListeners(bool complete = false)
+        private void OnMapStart(string mapName)
         {
-            if (!Config.Enabled) return;
-            if (complete)
-            {
-                RegisterListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
-                RegisterListener<Listeners.OnMapStart>(OnMapStart);
-                RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
-            }
+            // reload configuration
+            Config.Reload();
+            // save configuration
+            Config.Update();
+            // register listeners
             InitializeColoredSmokeGrenades();
             InitializeDeathBeams();
             InitializeSpectatorModel();
             InitializeBombModel();
         }
 
-        public void RemoveListeners(bool complete = false)
+        private void OnMapEnd()
         {
-            if (complete)
-            {
-                RemoveListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
-                RemoveListener<Listeners.OnMapStart>(OnMapStart);
-                RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
-            }
             ResetColoredSmokeGrenades();
             ResetDeathBeams();
             ResetSpectatorModel();
             ResetBombModel();
-        }
-
-        private void OnMapStart(string mapName)
-        {
-            // set current map
-            _currentMap = mapName.ToLower();
-            // initialize configuration
-            LoadConfig();
-            InitializeConfig(_currentMap);
-            // update configuration
-            UpdateConfig();
-            // save configuration
-            SaveConfig();
-            // register listeners
-            RegisterListeners();
-        }
-
-        private void OnMapEnd()
-        {
-            RemoveListeners();
         }
     }
 }
