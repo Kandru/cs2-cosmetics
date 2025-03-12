@@ -16,7 +16,7 @@ namespace Cosmetics
             // disable if globally disabled
             if (!Config.Global.SpectatorModel.Enable) return;
             // disable if map specific disabled
-            if (Config.MapConfigs == null || Server.MapName == null ||
+            if (Config == null || Server.MapName == null ||
                 (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
                 && !Config.MapConfigs[Server.MapName.ToLower()].SpectatorModel.Enable)) return;
             // register event handlers

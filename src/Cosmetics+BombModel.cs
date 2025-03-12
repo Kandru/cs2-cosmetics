@@ -10,6 +10,10 @@ namespace Cosmetics
         {
             // disable if globally disabled
             if (!Config.Global.BombModel.Enable) return;
+            // disable if map specific disabled
+            if (Config == null || Server.MapName == null ||
+                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
+                && !Config.MapConfigs[Server.MapName.ToLower()].BombModel.Enable)) return;
             // set map specific configuration
             if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower()))
                 bombModelConfig = Config.MapConfigs[Server.MapName.ToLower()].BombModel;
