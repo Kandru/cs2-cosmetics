@@ -186,11 +186,6 @@ namespace Cosmetics
             || !player.Pawn.IsValid) return false;
             // get player pawn
             var playerPawn = player!.Pawn!.Value;
-            float maxSpeed = 0.9f;
-            // set player max speed
-            playerPawn.AbsVelocity.X *= maxSpeed;
-            playerPawn.AbsVelocity.Y *= maxSpeed;
-            playerPawn.AbsVelocity.Z *= maxSpeed;
             // calculate tilt based on player's movement and angle
             float tiltSpeed = 1.0f; // Speed at which tilt angle is adjusted
             float maxTiltAngle = 55.0f; // Maximum tilt angle in degrees
