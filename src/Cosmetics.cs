@@ -8,11 +8,14 @@ namespace Cosmetics
         public override string ModuleName => "Cosmetics";
         public override string ModuleAuthor => "Jon-Mailes Graeffe <mail@jonni.it> / Kalle <kalle@kandru.de>";
 
-        private Random _random = new Random();
+        private readonly Random _random = new();
 
         public override void Load(bool hotReload)
         {
-            if (!Config.Enabled) return;
+            if (!Config.Enabled)
+            {
+                return;
+            }
             // register global listeners
             RegisterListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
             RegisterListener<Listeners.OnMapStart>(OnMapStart);

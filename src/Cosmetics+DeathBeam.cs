@@ -7,7 +7,8 @@ namespace Cosmetics
 {
     public partial class Cosmetics : BasePlugin
     {
-        private List<string> _deathbeamIgnoreWeapons = new List<string> {
+        private readonly List<string> _deathbeamIgnoreWeapons =
+        [
             "hegrenade",
             "molotov",
             "decoy",
@@ -27,18 +28,24 @@ namespace Cosmetics
             "c4",
             "bomb",
             "tripwirefire",
-        };
+        ];
 
-        private Dictionary<CCSPlayerController, Vector> _deathbeamLastBulletImpact = new();
+        private readonly Dictionary<CCSPlayerController, Vector> _deathbeamLastBulletImpact = [];
 
         private void InitializeDeathBeams()
         {
             // disable if globally disabled
-            if (!Config.Global.DeathBeam.Enable) return;
+            if (!Config.Global.DeathBeam.Enable)
+            {
+                return;
+            }
             // disable if map specific disabled
             if (Config == null || Server.MapName == null ||
-                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
-                && !Config.MapConfigs[Server.MapName.ToLower()].DeathBeam.Enable)) return;
+                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                && !Config.MapConfigs[Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)].DeathBeam.Enable))
+            {
+                return;
+            }
             // register event handlers
             RegisterEventHandler<EventPlayerDeath>(DeathBeamsOnPlayerDeath);
             RegisterEventHandler<EventBulletImpact>(DeathBeamsOnBulletImpact);
@@ -54,7 +61,11 @@ namespace Cosmetics
         private HookResult DeathBeamsOnBulletImpact(EventBulletImpact @event, GameEventInfo info)
         {
             CCSPlayerController attacker = @event.Userid!;
-            if (attacker == null) return HookResult.Continue;
+            if (attacker == null)
+            {
+                return HookResult.Continue;
+            }
+
             _deathbeamLastBulletImpact[attacker] = new Vector(@event.X, @event.Y, @event.Z);
             return HookResult.Continue;
         }
@@ -67,11 +78,14 @@ namespace Cosmetics
                 || attacker.Pawn == null || !attacker.Pawn.IsValid || attacker.Pawn.Value == null || attacker.Pawn.Value.CameraServices == null
                 || victim.Pawn == null || !victim.Pawn.IsValid || victim.Pawn.Value == null || victim.Pawn.Value.CameraServices == null
                 || attacker.Index == victim.Index
-                || _deathbeamIgnoreWeapons.Any(@event.Weapon.Contains)) return HookResult.Continue;
+                || _deathbeamIgnoreWeapons.Any(@event.Weapon.Contains))
+            {
+                return HookResult.Continue;
+            }
             // create beam from attackers eye position
             Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ - 5);
             // set end of beam to last bullet impact position if available
-            Vector victimHitVector = _deathbeamLastBulletImpact.ContainsKey(attacker) ? _deathbeamLastBulletImpact[attacker] : victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
+            Vector victimHitVector = _deathbeamLastBulletImpact.TryGetValue(attacker, out Vector? value) ? value : victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
             CreateBeam(attackerEyePos, victimHitVector, attacker.Team, 0.5f, 1.5f);
             return HookResult.Continue;
         }
@@ -80,19 +94,20 @@ namespace Cosmetics
         {
             CEnvBeam beam = Utilities.CreateEntityByName<CEnvBeam>("env_beam")!;
             beam.Width = width;
-            if (team == CsTeam.CounterTerrorist) beam.Render = Color.Blue;
-            else if (team == CsTeam.Terrorist) beam.Render = Color.Red;
-            else beam.Render = Color.White;
+            beam.Render = team == CsTeam.CounterTerrorist ? Color.Blue : team == CsTeam.Terrorist ? Color.Red : Color.White;
+
             beam.SetModel("materials/sprites/laserbeam.vtex");
             beam.Teleport(startOrigin);
             beam.EndPos.X = endOrigin.X;
             beam.EndPos.Y = endOrigin.Y;
             beam.EndPos.Z = endOrigin.Z;
             Utilities.SetStateChanged(beam, "CBeam", "m_vecEndPos");
-            AddTimer(timeout, () =>
+            _ = AddTimer(timeout, () =>
             {
                 if (beam != null && beam.IsValid)
+                {
                     beam.Remove();
+                }
             });
         }
     }

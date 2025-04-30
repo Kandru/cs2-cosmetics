@@ -8,17 +8,23 @@ namespace Cosmetics
 {
     public partial class Cosmetics : BasePlugin
     {
-        private Dictionary<CCSPlayerController, int> _spectatorModelPlayers = new();
+        private readonly Dictionary<CCSPlayerController, int> _spectatorModelPlayers = [];
         private readonly string _spectatorModel = "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl";
 
         private void InitializeSpectatorModel()
         {
             // disable if globally disabled
-            if (!Config.Global.SpectatorModel.Enable) return;
+            if (!Config.Global.SpectatorModel.Enable)
+            {
+                return;
+            }
             // disable if map specific disabled
             if (Config == null || Server.MapName == null ||
-                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower())
-                && !Config.MapConfigs[Server.MapName.ToLower()].SpectatorModel.Enable)) return;
+                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                && !Config.MapConfigs[Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)].SpectatorModel.Enable))
+            {
+                return;
+            }
             // register event handlers
             RegisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
             RegisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);
@@ -44,16 +50,25 @@ namespace Cosmetics
                     || player.Pawn.Value == null
                     || !player.Pawn.IsValid
                     || (player.Team != CsTeam.Spectator && !_spectatorModelPlayers.ContainsKey(player))
-                    ) continue;
+                    )
+                    {
+                        continue;
+                    }
                     // initial spawn
                     if (!_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
                     {
                         hasSpectators = true;
                         // continue if player is currently not in correct roaming mode
                         if (player.Pawn.Value.ObserverServices == null
-                            || player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING) continue;
+                            || player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)
+                        {
+                            continue;
+                        }
                         // start transmission if nobody else has yet
-                        if (_spectatorModelPlayers.Count == 0) RegisterListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
+                        if (_spectatorModelPlayers.Count == 0)
+                        {
+                            RegisterListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
+                        }
                         // spawn prop
                         _spectatorModelPlayers.Add(player,
                             SpawnProp(
@@ -62,16 +77,16 @@ namespace Cosmetics
                                 0.03f
                         ));
                     }
-                    else if (_spectatorModelPlayers.ContainsKey(player)
+                    else if (_spectatorModelPlayers.TryGetValue(player, out int value)
                         && (player.Pawn.Value.LifeState != (byte)LifeState_t.LIFE_DEAD
                         || (player.Pawn.Value.ObserverServices != null && player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)))
                     {
                         hasSpectators = true;
                         RemoveProp(
-                            _spectatorModelPlayers[player],
+value,
                             true
                         );
-                        _spectatorModelPlayers.Remove(player);
+                        _ = _spectatorModelPlayers.Remove(player);
                     }
                     else if (_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
                     {
@@ -83,7 +98,7 @@ namespace Cosmetics
                         ))
                         {
                             hasSpectators = true;
-                            _spectatorModelPlayers.Remove(player);
+                            _ = _spectatorModelPlayers.Remove(player);
                         }
                     }
                 }
@@ -93,7 +108,7 @@ namespace Cosmetics
                     Console.WriteLine(Localizer["core.error"].Value.Replace("{error}", e.Message));
                 }
             }
-            if (_spectatorModelPlayers.Count() == 0 && !hasSpectators)
+            if (_spectatorModelPlayers.Count == 0 && !hasSpectators)
             {
                 RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
             }
@@ -102,7 +117,7 @@ namespace Cosmetics
         private void EventSpectatorModelCheckTransmit(CCheckTransmitInfoList infoList)
         {
             // remove listener if no players to save resources
-            if (_spectatorModelPlayers.Count() == 0)
+            if (_spectatorModelPlayers.Count == 0)
             {
                 RemoveListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
                 return;
@@ -110,10 +125,22 @@ namespace Cosmetics
             // worker
             foreach ((CCheckTransmitInfo info, CCSPlayerController? player) in infoList)
             {
-                if (player == null) continue;
-                if (!_spectatorModelPlayers.ContainsKey(player)) continue;
-                var prop = Utilities.GetEntityFromIndex<CDynamicProp>(_spectatorModelPlayers[player]);
-                if (prop == null) continue;
+                if (player == null)
+                {
+                    continue;
+                }
+
+                if (!_spectatorModelPlayers.ContainsKey(player))
+                {
+                    continue;
+                }
+
+                CDynamicProp? prop = Utilities.GetEntityFromIndex<CDynamicProp>(_spectatorModelPlayers[player]);
+                if (prop == null)
+                {
+                    continue;
+                }
+
                 info.TransmitEntities.Remove(prop);
             }
         }
@@ -123,7 +150,7 @@ namespace Cosmetics
             if (@event.Team == (byte)CsTeam.Spectator)
             {
                 // start listener if the first player joined spectator team
-                if (_spectatorModelPlayers.Count() == 0)
+                if (_spectatorModelPlayers.Count == 0)
                 {
                     RegisterListener<Listeners.OnTick>(EventSpectatorModelOnTick);
                 }
@@ -134,13 +161,13 @@ namespace Cosmetics
         private HookResult EventSpectatorModelOnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
             CCSPlayerController player = @event.Userid!;
-            if (_spectatorModelPlayers.ContainsKey(player))
+            if (_spectatorModelPlayers.TryGetValue(player, out int value))
             {
                 RemoveProp(
-                    _spectatorModelPlayers[player],
+value,
                     true
                 );
-                _spectatorModelPlayers.Remove(player);
+                _ = _spectatorModelPlayers.Remove(player);
             }
             return HookResult.Continue;
         }
@@ -149,7 +176,10 @@ namespace Cosmetics
         {
             // sanity checks
             if (player == null
-            || player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null) return -1;
+            || player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null)
+            {
+                return -1;
+            }
             // create dynamic prop
             CDynamicProp prop;
             prop = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic_override")!;
@@ -174,18 +204,21 @@ namespace Cosmetics
             return (int)prop.Index;
         }
 
-        private bool UpdateProp(CCSPlayerController player, int index, int offset_z = 0, int offset_angle = 0)
+        private static bool UpdateProp(CCSPlayerController player, int index, int offset_z = 0, int offset_angle = 0)
         {
-            var prop = Utilities.GetEntityFromIndex<CDynamicProp>((int)index);
+            CDynamicProp? prop = Utilities.GetEntityFromIndex<CDynamicProp>(index);
             // sanity checks
             if (prop == null
             || prop.AbsRotation == null
             || player == null
             || player.Pawn == null
             || player.Pawn.Value == null
-            || !player.Pawn.IsValid) return false;
+            || !player.Pawn.IsValid)
+            {
+                return false;
+            }
             // get player pawn
-            var playerPawn = player!.Pawn!.Value;
+            CBasePlayerPawn playerPawn = player!.Pawn!.Value;
             // calculate tilt based on player's movement and angle
             float tiltSpeed = 1.0f; // Speed at which tilt angle is adjusted
             float maxTiltAngle = 55.0f; // Maximum tilt angle in degrees
@@ -219,22 +252,22 @@ namespace Cosmetics
                 tiltAngle = currentTiltAngle; // No change needed
             }
             // build vectors
-            Vector playerOrigin = new Vector(
+            Vector playerOrigin = new(
                 (float)Math.Round(playerPawn.AbsOrigin!.X, 5),
                 (float)Math.Round(playerPawn.AbsOrigin!.Y, 5),
                 (float)Math.Round(playerPawn.AbsOrigin!.Z, 5) + offset_z
             );
-            Vector propOrigin = new Vector(
+            Vector propOrigin = new(
                 (float)Math.Round(prop.AbsOrigin!.X, 5),
                 (float)Math.Round(prop.AbsOrigin!.Y, 5),
                 (float)Math.Round(prop.AbsOrigin!.Z, 5)
             );
-            QAngle playerRotation = new QAngle(
+            QAngle playerRotation = new(
                 (float)Math.Round(playerPawn.V_angle!.X, 5),
                 (float)Math.Round(playerPawn.V_angle!.Y, 5) + offset_angle,
                 tiltAngle
             );
-            QAngle propRotation = new QAngle(
+            QAngle propRotation = new(
                 0,
                 (float)Math.Round(prop.AbsRotation!.Y, 5),
                 0
@@ -243,21 +276,32 @@ namespace Cosmetics
             if (playerOrigin.X == propOrigin.X
                 && playerOrigin.Y == propOrigin.Y
                 && playerOrigin.Z == propOrigin.Z
-                && playerRotation.Y == propRotation.Y) return true;
+                && playerRotation.Y == propRotation.Y)
+            {
+                return true;
+            }
+
             prop.Teleport(playerOrigin, playerRotation);
             return true;
         }
 
-        private void RemoveProp(int index, bool softRemove = false)
+        private static void RemoveProp(int index, bool softRemove = false)
         {
-            var prop = Utilities.GetEntityFromIndex<CDynamicProp>((int)index);
+            CDynamicProp? prop = Utilities.GetEntityFromIndex<CDynamicProp>(index);
             // remove plant entity
             if (prop == null)
+            {
                 return;
+            }
+
             if (softRemove)
+            {
                 prop.Teleport(new Vector(-999, -999, -999));
+            }
             else
+            {
                 prop.Remove();
+            }
         }
     }
 }

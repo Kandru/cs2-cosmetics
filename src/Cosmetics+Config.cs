@@ -49,7 +49,6 @@ namespace Cosmetics
     public partial class Cosmetics : BasePlugin, IPluginConfig<PluginConfig>
     {
         public PluginConfig Config { get; set; } = null!;
-        private Dictionary<string, MapConfig> _mapConfigs = [];
 
         public void OnConfigParsed(PluginConfig config)
         {
