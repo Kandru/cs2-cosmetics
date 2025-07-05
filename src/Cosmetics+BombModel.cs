@@ -6,39 +6,34 @@ namespace Cosmetics
     public partial class Cosmetics : BasePlugin
     {
         private BombModelConfig? bombModelConfig;
+
         private void InitializeBombModel()
         {
-            // disable if globally disabled
-            if (!Config.Global.BombModel.Enable)
+            if (Config == null || Server.MapName == null)
             {
                 return;
             }
-            // disable if map specific disabled
-            if (Config == null || Server.MapName == null ||
-                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture))
-                && !Config.MapConfigs[Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)].BombModel.Enable))
+
+            string mapName = Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture);
+            bool hasMapConfig = Config.MapConfigs.ContainsKey(mapName);
+            BombModelConfig? mapConfig = hasMapConfig ? Config.MapConfigs[mapName].BombModel : null;
+
+            // Merge mapConfig with global as fallback
+            bombModelConfig = mapConfig ?? Config.Global.BombModel;
+
+            // Disable if globally or map-specific disabled
+            if (!Config.Global.BombModel.Enable || (mapConfig != null && !mapConfig.Enable))
             {
                 return;
             }
-            // set map specific configuration
-            if (Config.MapConfigs.ContainsKey(Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)))
-            {
-                bombModelConfig = Config.MapConfigs[Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)].BombModel;
-            }
-            // disable if map specific disabled
-            if (bombModelConfig != null && !bombModelConfig.Enable)
-            {
-                return;
-            }
-            // register event handler
-            if ((bombModelConfig != null && bombModelConfig.ModifyPlantedC4)
-                || (bombModelConfig == null && Config.Global.BombModel.ModifyPlantedC4))
+
+            // Register event handlers based on config
+            if (bombModelConfig.ModifyPlantedC4)
             {
                 RegisterEventHandler<EventBombPlanted>(BombModelOnBombPlanted);
             }
 
-            if ((bombModelConfig != null && bombModelConfig.ModifyWeaponC4)
-                || (bombModelConfig == null && Config.Global.BombModel.ModifyWeaponC4))
+            if (bombModelConfig.ModifyWeaponC4)
             {
                 RegisterEventHandler<EventBombPickup>(BombModelOnBombPickup);
             }
