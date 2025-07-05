@@ -12,6 +12,12 @@ namespace Cosmetics
 
         private void OnServerPrecacheResources(ResourceManifest manifest)
         {
+            // precache tombstone model
+            if (deathTombstoneConfig != null)
+            {
+                manifest.AddResource(deathTombstoneConfig.Model);
+            }
+            // precache other models
             foreach (string model in _precacheModels)
             {
                 manifest.AddResource(model);

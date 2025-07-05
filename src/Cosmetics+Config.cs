@@ -22,6 +22,13 @@ namespace Cosmetics
         [JsonPropertyName("enable")] public bool Enable { get; set; } = true;
     }
 
+    public class DeathTombstoneConfig
+    {
+        [JsonPropertyName("enable")] public bool Enable { get; set; } = true;
+        [JsonPropertyName("model")] public string Model { get; set; } = "models/cs2/kandru/tombstone.vmdl";
+        [JsonPropertyName("size")] public float Size { get; set; } = 1.0f;
+        [JsonPropertyName("health")] public int Health { get; set; } = 100;
+    }
 
     public class SpectatorModelConfig
     {
@@ -33,6 +40,7 @@ namespace Cosmetics
         [JsonPropertyName("bombmodel")] public BombModelConfig BombModel { get; set; } = new BombModelConfig();
         [JsonPropertyName("coloredsmokegrenades")] public ColoredSmokeGrenadesConfig ColoredSmokeGrenades { get; set; } = new ColoredSmokeGrenadesConfig();
         [JsonPropertyName("deathbeam")] public DeathbeamConfig DeathBeam { get; set; } = new DeathbeamConfig();
+        [JsonPropertyName("deathtombstone")] public DeathTombstoneConfig DeathTombstone { get; set; } = new DeathTombstoneConfig();
         [JsonPropertyName("spectatormodel")] public SpectatorModelConfig SpectatorModel { get; set; } = new SpectatorModelConfig();
     }
 

@@ -23,6 +23,7 @@ namespace Cosmetics
             // register module listeners
             InitializeColoredSmokeGrenades();
             InitializeDeathBeams();
+            InitializeDeathTombstone();
             InitializeSpectatorModel();
             InitializeBombModel();
             // initialize configuration
@@ -44,6 +45,7 @@ namespace Cosmetics
             // unregister module listeners
             ResetColoredSmokeGrenades();
             ResetDeathBeams();
+            ResetDeathTombstone();
             ResetSpectatorModel();
             ResetBombModel();
             Console.WriteLine(Localizer["core.unload"]);
@@ -58,6 +60,7 @@ namespace Cosmetics
             // register listeners
             InitializeColoredSmokeGrenades();
             InitializeDeathBeams();
+            InitializeDeathTombstone();
             InitializeSpectatorModel();
             InitializeBombModel();
         }
@@ -66,6 +69,7 @@ namespace Cosmetics
         {
             ResetColoredSmokeGrenades();
             ResetDeathBeams();
+            ResetDeathTombstone();
             ResetSpectatorModel();
             ResetBombModel();
         }
