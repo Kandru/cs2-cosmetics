@@ -50,7 +50,7 @@ namespace Cosmetics
             {
                 return HookResult.Continue;
             }
-            SpawnTombstone(victim.Pawn.Value.AbsOrigin, new QAngle(0, victim.Pawn.Value.V_angle.Y, 0));
+            SpawnTombstone(victim.Pawn.Value.AbsOrigin, new QAngle(0, victim.Pawn.Value.V_angle.Y + 90, 0));
             return HookResult.Continue;
         }
 
