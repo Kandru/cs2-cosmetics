@@ -4,6 +4,6 @@ namespace Cosmetics
 {
     public partial class Cosmetics : BasePlugin
     {
-        public override string ModuleVersion => "1.1.16";
+        public override string ModuleVersion => "1.1.17";
     }
 }
