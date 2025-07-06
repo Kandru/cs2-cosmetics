@@ -20,12 +20,6 @@ namespace Cosmetics
             RegisterListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
             RegisterListener<Listeners.OnMapStart>(OnMapStart);
             RegisterListener<Listeners.OnMapEnd>(OnMapEnd);
-            // register module listeners
-            InitializeColoredSmokeGrenades();
-            InitializeDeathBeams();
-            InitializeDeathTombstone();
-            InitializeSpectatorModel();
-            InitializeBombModel();
             // initialize configuration
             if (hotReload)
             {
@@ -33,6 +27,12 @@ namespace Cosmetics
                 Config.Reload();
                 // save configuration
                 Config.Update();
+                // register module listeners
+                InitializeColoredSmokeGrenades();
+                InitializeDeathBeams();
+                InitializeDeathTombstone();
+                InitializeSpectatorModel();
+                InitializeBombModel();
             }
         }
 
