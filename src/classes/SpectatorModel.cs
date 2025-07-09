@@ -4,42 +4,40 @@ using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using System.Drawing;
 
-namespace Cosmetics
+namespace Cosmetics.Classes
 {
-    public partial class Cosmetics : BasePlugin
+    public partial class SpectatorModel : ParentModule
     {
+        public override List<string> Events =>
+        [
+            "EventPlayerTeam",
+            "EventPlayerDisconnect"
+        ];
+        public override List<string> Listeners =>
+        [
+            "CheckTransmit",
+            "OnTick"
+        ];
+        public override List<string> Precache =>
+        [
+            "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl"
+        ];
         private readonly Dictionary<CCSPlayerController, int> _spectatorModelPlayers = [];
         private readonly string _spectatorModel = "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl";
 
-        private void InitializeSpectatorModel()
+        public SpectatorModel(PluginConfig Config) : base(Config)
         {
-            // disable if globally disabled
-            if (!Config.Global.SpectatorModel.Enable)
-            {
-                return;
-            }
-            // disable if map specific disabled
-            if (Config == null || Server.MapName == null ||
-                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture))
-                && !Config.MapConfigs[Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)].SpectatorModel.Enable))
-            {
-                return;
-            }
-            // register event handlers
-            RegisterEventHandler<EventPlayerTeam>(EventSpectatorModelOnPlayerTeam);
-            RegisterEventHandler<EventPlayerDisconnect>(EventSpectatorModelOnPlayerDisconnect);
+            Console.WriteLine("[Cosmetics] Initializing SpectatorModel module...");
         }
 
-        private void ResetSpectatorModel()
+        public new void Destroy()
         {
-            // unregister event handlers
-            RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
-            RemoveListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
-            _spectatorModelPlayers.Clear();
+            Console.WriteLine("[Cosmetics] Destroying SpectatorModel module...");
         }
-        private void EventSpectatorModelOnTick()
+
+        public void OnTick()
         {
-            bool hasSpectators = false;
+            //bool hasSpectators = false;
             foreach (CCSPlayerController player in Utilities.GetPlayers())
             {
                 try
@@ -57,7 +55,7 @@ namespace Cosmetics
                     // initial spawn
                     if (!_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
                     {
-                        hasSpectators = true;
+                        //hasSpectators = true;
                         // continue if player is currently not in correct roaming mode
                         if (player.Pawn.Value.ObserverServices == null
                             || player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)
@@ -67,7 +65,8 @@ namespace Cosmetics
                         // start transmission if nobody else has yet
                         if (_spectatorModelPlayers.Count == 0)
                         {
-                            RegisterListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
+                            // TODO: optimize loop by not using Utilities.GetPlayers() (performance hit otherwise)
+                            return;
                         }
                         // spawn prop
                         _spectatorModelPlayers.Add(player,
@@ -81,9 +80,9 @@ namespace Cosmetics
                         && (player.Pawn.Value.LifeState != (byte)LifeState_t.LIFE_DEAD
                         || (player.Pawn.Value.ObserverServices != null && player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)))
                     {
-                        hasSpectators = true;
+                        //hasSpectators = true;
                         RemoveProp(
-value,
+                            value,
                             true
                         );
                         _ = _spectatorModelPlayers.Remove(player);
@@ -97,29 +96,25 @@ value,
                             0
                         ))
                         {
-                            hasSpectators = true;
+                            //hasSpectators = true;
                             _ = _spectatorModelPlayers.Remove(player);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    // log error
-                    Console.WriteLine(Localizer["core.error"].Value.Replace("{error}", e.Message));
+                    Console.WriteLine(e);
+                    // TODO: proper error handling
                 }
-            }
-            if (_spectatorModelPlayers.Count == 0 && !hasSpectators)
-            {
-                RemoveListener<Listeners.OnTick>(EventSpectatorModelOnTick);
             }
         }
 
-        private void EventSpectatorModelCheckTransmit(CCheckTransmitInfoList infoList)
+        public void CheckTransmit(CCheckTransmitInfoList infoList)
         {
             // remove listener if no players to save resources
             if (_spectatorModelPlayers.Count == 0)
             {
-                RemoveListener<Listeners.CheckTransmit>(EventSpectatorModelCheckTransmit);
+                // TODO: proper handling
                 return;
             }
             // worker
@@ -145,26 +140,26 @@ value,
             }
         }
 
-        private HookResult EventSpectatorModelOnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+        public HookResult EventPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
         {
             if (@event.Team == (byte)CsTeam.Spectator)
             {
                 // start listener if the first player joined spectator team
                 if (_spectatorModelPlayers.Count == 0)
                 {
-                    RegisterListener<Listeners.OnTick>(EventSpectatorModelOnTick);
+                    // TODO: optimize loop by not using Utilities.GetPlayers() (performance hit otherwise)
                 }
             }
             return HookResult.Continue;
         }
 
-        private HookResult EventSpectatorModelOnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+        public HookResult EventPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
             CCSPlayerController player = @event.Userid!;
             if (_spectatorModelPlayers.TryGetValue(player, out int value))
             {
                 RemoveProp(
-value,
+                    value,
                     true
                 );
                 _ = _spectatorModelPlayers.Remove(player);

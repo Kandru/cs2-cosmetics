@@ -3,35 +3,26 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using System.Drawing;
 
-namespace Cosmetics
+namespace Cosmetics.Classes
 {
-    public partial class Cosmetics : BasePlugin
+    public class ColoredSmokeGrenades : ParentModule
     {
-        private void InitializeColoredSmokeGrenades()
+        public override List<string> Listeners =>
+        [
+            "OnEntitySpawned"
+        ];
+
+        public ColoredSmokeGrenades(PluginConfig Config) : base(Config)
         {
-            // disable if globally disabled
-            if (!Config.Global.ColoredSmokeGrenades.Enable)
-            {
-                return;
-            }
-            // disable if map specific disabled
-            if (Config == null || Server.MapName == null ||
-                (Config.MapConfigs.ContainsKey(Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture))
-                && !Config.MapConfigs[Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture)].ColoredSmokeGrenades.Enable))
-            {
-                return;
-            }
-            // register event handler
-            RegisterListener<Listeners.OnEntitySpawned>(ColoredSmokeGrenadesOnEntitySpawned);
+            Console.WriteLine("[Cosmetics] Initializing ColoredSmokeGrenades module...");
         }
 
-        private void ResetColoredSmokeGrenades()
+        public new void Destroy()
         {
-            // unregister event handler
-            RemoveListener<Listeners.OnEntitySpawned>(ColoredSmokeGrenadesOnEntitySpawned);
+            Console.WriteLine("[Cosmetics] Destroying ColoredSmokeGrenades module...");
         }
 
-        private void ColoredSmokeGrenadesOnEntitySpawned(CEntityInstance entity)
+        public void OnEntitySpawned(CEntityInstance entity)
         {
             if (entity.DesignerName != "smokegrenade_projectile")
             {

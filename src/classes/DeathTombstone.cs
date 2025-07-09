@@ -3,47 +3,31 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Utils;
 
-namespace Cosmetics
+namespace Cosmetics.Classes
 {
-    public partial class Cosmetics : BasePlugin
+    public partial class DeathTombstone : ParentModule
     {
-        private DeathTombstoneConfig? deathTombstoneConfig;
+        public override List<string> Events =>
+        [
+            "EventPlayerDeath"
+        ];
 
-        private void InitializeDeathTombstone()
+        public DeathTombstone(PluginConfig Config) : base(Config)
         {
-            if (Config == null || Server.MapName == null)
+            // add model to precache list
+            if (!string.IsNullOrEmpty(_config.Modules.DeathTombstone.Model))
             {
-                return;
+                Precache.Add(_config.Modules.DeathTombstone.Model);
             }
-
-            var mapName = Server.MapName.ToLower(System.Globalization.CultureInfo.CurrentCulture);
-
-            // Use map-specific config if it exists, otherwise use global
-            if (Config.MapConfigs.TryGetValue(mapName, out var mapConfig) && mapConfig.DeathTombstone != null)
-            {
-                deathTombstoneConfig = mapConfig.DeathTombstone;
-            }
-            else
-            {
-                deathTombstoneConfig = Config.Global.DeathTombstone;
-            }
-
-            // Disable if globally or map specifically disabled
-            if (deathTombstoneConfig == null || !deathTombstoneConfig.Enable)
-            {
-                return;
-            }
-
-            RegisterEventHandler<EventPlayerDeath>(DeathTombstoneOnPlayerDeath);
+            Console.WriteLine("[Cosmetics] Initializing DeathTombstone module...");
         }
 
-        private void ResetDeathTombstone()
+        public new void Destroy()
         {
-            // unregister event handlers
-            DeregisterEventHandler<EventPlayerDeath>(DeathTombstoneOnPlayerDeath);
+            Console.WriteLine("[Cosmetics] Destroying DeathTombstone module...");
         }
 
-        private HookResult DeathTombstoneOnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
+        public HookResult EventPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
         {
             CCSPlayerController victim = @event.Userid!;
             if (victim?.Pawn?.Value?.AbsOrigin == null)
@@ -59,8 +43,7 @@ namespace Cosmetics
             // create pole prop
             CPhysicsProp? prop = Utilities.CreateEntityByName<CPhysicsProp>("prop_physics_override");
             if (prop == null
-                || !prop.IsValid
-                || deathTombstoneConfig == null)
+                || !prop.IsValid)
             {
                 return;
             }
@@ -70,13 +53,13 @@ namespace Cosmetics
             prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEFAULT;
             prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEFAULT;
             prop.DispatchSpawn();
-            prop.SetModel(deathTombstoneConfig.Model);
-            prop.CBodyComponent!.SceneNode!.Scale = deathTombstoneConfig.Size;
+            prop.SetModel(_config.Modules.DeathTombstone.Model);
+            prop.CBodyComponent!.SceneNode!.Scale = _config.Modules.DeathTombstone.Size;
             // give prop some health
-            if (deathTombstoneConfig.Health > 0)
+            if (_config.Modules.DeathTombstone.Health > 0)
             {
-                prop.MaxHealth = deathTombstoneConfig.Health;
-                prop.Health = deathTombstoneConfig.Health;
+                prop.MaxHealth = _config.Modules.DeathTombstone.Health;
+                prop.Health = _config.Modules.DeathTombstone.Health;
                 Utilities.SetStateChanged(prop, "CBaseEntity", "m_iHealth");
                 Utilities.SetStateChanged(prop, "CBaseEntity", "m_iMaxHealth");
                 prop.TakesDamage = true;
