@@ -46,7 +46,7 @@ namespace Cosmetics
             // skip if map config file does not exist
             if (!File.Exists(mapConfigPath))
             {
-                Console.WriteLine(Localizer["core.defaultconfig"]);
+                Console.WriteLine(Localizer["core.defaultconfig"].Value.Replace("{mapName}", mapName));
                 return;
             }
             // try to load map config
