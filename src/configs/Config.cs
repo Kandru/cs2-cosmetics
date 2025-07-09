@@ -19,6 +19,8 @@ namespace Cosmetics
     {
         // kill switch
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        // debug mode
+        [JsonPropertyName("debug")] public bool Debug { get; set; } = false;
         // module settings
         [JsonPropertyName("modules")] public ModuleConfig Modules { get; set; } = new ModuleConfig();
     }

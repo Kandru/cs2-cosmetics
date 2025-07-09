@@ -128,10 +128,10 @@ namespace Cosmetics
         {
             foreach (ParentModule module in _cosmetics)
             {
-                Console.WriteLine($"Initializing listener for module {module.GetType().Name}");
+                DebugPrint($"Initializing listener for module {module.GetType().Name}");
                 foreach (string listenerName in module.Listeners)
                 {
-                    Console.WriteLine($"- {listenerName}");
+                    DebugPrint($"- {listenerName}");
                     RegisterModuleListener(listenerName, module);
                 }
             }
@@ -141,10 +141,10 @@ namespace Cosmetics
         {
             foreach (ParentModule module in _cosmetics)
             {
-                Console.WriteLine($"Destroying listener for module {module.GetType().Name}");
+                DebugPrint($"Destroying listener for module {module.GetType().Name}");
                 foreach (string listenerName in module.Listeners)
                 {
-                    Console.WriteLine($"- {listenerName}");
+                    DebugPrint($"- {listenerName}");
                     DeregisterModuleListener(listenerName, module);
                 }
             }
@@ -156,14 +156,14 @@ namespace Cosmetics
             Type? listenerType = typeof(Listeners).GetNestedType(listenerName);
             if (listenerType == null)
             {
-                Console.WriteLine($"Listener type {listenerName} not found");
+                DebugPrint($"Listener type {listenerName} not found");
                 return;
             }
             // get the method from the module
             MethodInfo? method = module.GetType().GetMethod(listenerName);
             if (method == null)
             {
-                Console.WriteLine($"Method {listenerName} not found in module {module.GetType().Name}");
+                DebugPrint($"Method {listenerName} not found in module {module.GetType().Name}");
                 return;
             }
             // create delegate
@@ -173,7 +173,7 @@ namespace Cosmetics
                 .FirstOrDefault(m => m.Name == "RegisterListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
             if (registerMethod == null)
             {
-                Console.WriteLine("RegisterListener method not found.");
+                DebugPrint("RegisterListener method not found.");
                 return;
             }
             MethodInfo genericRegisterMethod = registerMethod.MakeGenericMethod(listenerType);
@@ -186,14 +186,14 @@ namespace Cosmetics
             Type? listenerType = typeof(Listeners).GetNestedType(listenerName);
             if (listenerType == null)
             {
-                Console.WriteLine($"Listener type {listenerName} not found");
+                DebugPrint($"Listener type {listenerName} not found");
                 return;
             }
             // get the method from the module
             MethodInfo? method = module.GetType().GetMethod(listenerName);
             if (method == null)
             {
-                Console.WriteLine($"Method {listenerName} not found in module {module.GetType().Name}");
+                DebugPrint($"Method {listenerName} not found in module {module.GetType().Name}");
                 return;
             }
             // create delegate
@@ -203,7 +203,7 @@ namespace Cosmetics
                 .FirstOrDefault(m => m.Name == "RemoveListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
             if (removeMethod == null)
             {
-                Console.WriteLine("RemoveListener method not found.");
+                DebugPrint("RemoveListener method not found.");
                 return;
             }
             MethodInfo genericRemoveMethod = removeMethod.MakeGenericMethod(listenerType);
@@ -214,10 +214,10 @@ namespace Cosmetics
         {
             foreach (ParentModule module in _cosmetics)
             {
-                Console.WriteLine($"Initializing event handlers for module {module.GetType().Name}");
+                DebugPrint($"Initializing event handlers for module {module.GetType().Name}");
                 foreach (string eventName in module.Events)
                 {
-                    Console.WriteLine($"- {eventName}");
+                    DebugPrint($"- {eventName}");
                     RegisterModuleEventHandler(eventName, module);
                 }
             }
@@ -227,10 +227,10 @@ namespace Cosmetics
         {
             foreach (ParentModule module in _cosmetics)
             {
-                Console.WriteLine($"Destroying event handlers for module {module.GetType().Name}");
+                DebugPrint($"Destroying event handlers for module {module.GetType().Name}");
                 foreach (string eventName in module.Events)
                 {
-                    Console.WriteLine($"- {eventName}");
+                    DebugPrint($"- {eventName}");
                     DeregisterModuleEventHandler(eventName, module);
                 }
             }
@@ -242,7 +242,7 @@ namespace Cosmetics
             Type? eventType = typeof(BasePlugin).Assembly.GetType($"CounterStrikeSharp.API.Core.{eventName}");
             if (eventType == null)
             {
-                Console.WriteLine($"Event type {eventName} not found");
+                DebugPrint($"Event type {eventName} not found");
                 return;
             }
 
@@ -250,7 +250,7 @@ namespace Cosmetics
             MethodInfo? method = module.GetType().GetMethod(eventName);
             if (method == null)
             {
-                Console.WriteLine($"Method {eventName} not found in module {module.GetType().Name}");
+                DebugPrint($"Method {eventName} not found in module {module.GetType().Name}");
                 return;
             }
 
@@ -263,7 +263,7 @@ namespace Cosmetics
                 .FirstOrDefault(m => m.Name == "RegisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
             if (registerMethod == null)
             {
-                Console.WriteLine("RegisterEventHandler method not found.");
+                DebugPrint("RegisterEventHandler method not found.");
                 return;
             }
             MethodInfo genericRegisterMethod = registerMethod.MakeGenericMethod(eventType);
@@ -276,7 +276,7 @@ namespace Cosmetics
             Type? eventType = typeof(BasePlugin).Assembly.GetType($"CounterStrikeSharp.API.Core.{eventName}");
             if (eventType == null)
             {
-                Console.WriteLine($"Event type {eventName} not found");
+                DebugPrint($"Event type {eventName} not found");
                 return;
             }
 
@@ -284,7 +284,7 @@ namespace Cosmetics
             MethodInfo? method = module.GetType().GetMethod(eventName);
             if (method == null)
             {
-                Console.WriteLine($"Method {eventName} not found in module {module.GetType().Name}");
+                DebugPrint($"Method {eventName} not found in module {module.GetType().Name}");
                 return;
             }
 
@@ -297,7 +297,7 @@ namespace Cosmetics
                 .FirstOrDefault(m => m.Name == "DeregisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
             if (deregisterMethod == null)
             {
-                Console.WriteLine("DeregisterEventHandler method not found.");
+                DebugPrint("DeregisterEventHandler method not found.");
                 return;
             }
             MethodInfo genericDeregisterMethod = deregisterMethod.MakeGenericMethod(eventType);
