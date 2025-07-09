@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Extensions;
 using CounterStrikeSharp.API.Modules.Utils;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Cosmetics
@@ -56,10 +57,12 @@ namespace Cosmetics
             // initialize modules (otherwise no models are precached)
             InitializeModules();
             // precache resources for all cosmetics modules
+            DebugPrint("Pre-caching resources for cosmetics modules...");
             foreach (ParentModule module in _cosmetics)
             {
                 foreach (string model in module.Precache)
                 {
+                    DebugPrint($"Pre-caching model: {model}");
                     manifest.AddResource(model);
                 }
             }
