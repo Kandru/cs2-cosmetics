@@ -10,7 +10,6 @@ namespace Cosmetics
     {
         public override string ModuleName => "Cosmetics";
         public override string ModuleAuthor => "Kalle <kalle@kandru.de>";
-        private readonly Random _random = new();
         private readonly List<ParentModule> _cosmetics = [];
 
         public override void Load(bool hotReload)
@@ -54,6 +53,8 @@ namespace Cosmetics
 
         private void OnServerPrecacheResources(ResourceManifest manifest)
         {
+            // initialize modules (otherwise no models are precached)
+            InitializeModules();
             // precache resources for all cosmetics modules
             foreach (ParentModule module in _cosmetics)
             {
@@ -90,6 +91,10 @@ namespace Cosmetics
 
         private void InitializeModules()
         {
+            if (_cosmetics.Count > 0)
+            {
+                return;
+            }
             // get current configuration
             PluginConfig config = _mapConfig ?? Config;
             // skip if globally disabled
@@ -126,7 +131,7 @@ namespace Cosmetics
                 Console.WriteLine($"Initializing listener for module {module.GetType().Name}");
                 foreach (string listenerName in module.Listeners)
                 {
-                    Console.WriteLine($"- Registering listener {listenerName}");
+                    Console.WriteLine($"- {listenerName}");
                     RegisterModuleListener(listenerName, module);
                 }
             }
@@ -139,7 +144,7 @@ namespace Cosmetics
                 Console.WriteLine($"Destroying listener for module {module.GetType().Name}");
                 foreach (string listenerName in module.Listeners)
                 {
-                    Console.WriteLine($"- Deregistering listener {listenerName}");
+                    Console.WriteLine($"- {listenerName}");
                     DeregisterModuleListener(listenerName, module);
                 }
             }
@@ -154,7 +159,6 @@ namespace Cosmetics
                 Console.WriteLine($"Listener type {listenerName} not found");
                 return;
             }
-
             // get the method from the module
             MethodInfo? method = module.GetType().GetMethod(listenerName);
             if (method == null)
@@ -162,13 +166,11 @@ namespace Cosmetics
                 Console.WriteLine($"Method {listenerName} not found in module {module.GetType().Name}");
                 return;
             }
-
             // create delegate
             Delegate handler = Delegate.CreateDelegate(listenerType, module, method);
-
             // use reflection to call RegisterListener<T>
-            MethodInfo? registerMethod = typeof(BasePlugin).GetMethod("RegisterListener", BindingFlags.Public | BindingFlags.Instance)
-                                        ?? typeof(BasePlugin).GetMethod("RegisterListener", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo? registerMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(m => m.Name == "RegisterListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
             if (registerMethod == null)
             {
                 Console.WriteLine("RegisterListener method not found.");
@@ -187,7 +189,6 @@ namespace Cosmetics
                 Console.WriteLine($"Listener type {listenerName} not found");
                 return;
             }
-
             // get the method from the module
             MethodInfo? method = module.GetType().GetMethod(listenerName);
             if (method == null)
@@ -195,14 +196,11 @@ namespace Cosmetics
                 Console.WriteLine($"Method {listenerName} not found in module {module.GetType().Name}");
                 return;
             }
-
             // create delegate
             Delegate handler = Delegate.CreateDelegate(listenerType, module, method);
-
-            // use reflection to call RemoveListener<T> - try different approaches
-            MethodInfo? removeMethod = typeof(BasePlugin).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
-                              .FirstOrDefault(m => m.Name == "RemoveListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
-
+            // use reflection to call RemoveListener<T>
+            MethodInfo? removeMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(m => m.Name == "RemoveListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
             if (removeMethod == null)
             {
                 Console.WriteLine("RemoveListener method not found.");
@@ -219,7 +217,7 @@ namespace Cosmetics
                 Console.WriteLine($"Initializing event handlers for module {module.GetType().Name}");
                 foreach (string eventName in module.Events)
                 {
-                    Console.WriteLine($"- Registering event handler {eventName}");
+                    Console.WriteLine($"- {eventName}");
                     RegisterModuleEventHandler(eventName, module);
                 }
             }
@@ -232,7 +230,7 @@ namespace Cosmetics
                 Console.WriteLine($"Destroying event handlers for module {module.GetType().Name}");
                 foreach (string eventName in module.Events)
                 {
-                    Console.WriteLine($"- event handler {eventName}");
+                    Console.WriteLine($"- {eventName}");
                     DeregisterModuleEventHandler(eventName, module);
                 }
             }
@@ -261,8 +259,8 @@ namespace Cosmetics
             Delegate handler = Delegate.CreateDelegate(gameEventHandlerType, module, method);
 
             // use reflection to call RegisterEventHandler<T>
-            MethodInfo? registerMethod = typeof(BasePlugin).GetMethod("RegisterEventHandler", BindingFlags.Public | BindingFlags.Instance)
-                ?? typeof(BasePlugin).GetMethod("RegisterEventHandler", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo? registerMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(m => m.Name == "RegisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
             if (registerMethod == null)
             {
                 Console.WriteLine("RegisterEventHandler method not found.");
@@ -294,9 +292,9 @@ namespace Cosmetics
             Type gameEventHandlerType = typeof(BasePlugin).GetNestedType("GameEventHandler`1")!.MakeGenericType(eventType);
             Delegate handler = Delegate.CreateDelegate(gameEventHandlerType, module, method);
 
-            // use reflection to call DeregisterEventHandler<T> - specify parameter types to avoid ambiguity
-            MethodInfo? deregisterMethod = typeof(BasePlugin).GetMethod("DeregisterEventHandler", BindingFlags.Public | BindingFlags.Instance, null, [gameEventHandlerType, typeof(HookMode)], null)
-                                          ?? typeof(BasePlugin).GetMethod("DeregisterEventHandler", BindingFlags.NonPublic | BindingFlags.Instance, null, [gameEventHandlerType, typeof(HookMode)], null);
+            // use reflection to call DeregisterEventHandler<T>
+            MethodInfo? deregisterMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(m => m.Name == "DeregisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
             if (deregisterMethod == null)
             {
                 Console.WriteLine("DeregisterEventHandler method not found.");
