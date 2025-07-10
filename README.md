@@ -13,7 +13,10 @@ CounterstrikeSharp - Cosmetics is a plugin for Counter-Strike 2 that allows serv
 ## Features
 
 - Colored smoke grenades depending on the players team
-- Death Beam going from the attackers eye to the impact position of the bullet
+- Death Beam going from the attacker to victim
+- Tombstone which spawns on player death
+- Model for spectators (defaults to a small airplane)
+- Changing bomb model
 
 
 ## Installation
@@ -63,14 +66,19 @@ This plugin automatically creates a readable JSON configuration file. This confi
       "health": 100
     },
     "spectatormodel": {
-      "enabled": true
+      "enabled": true,
+      "message_chat": true,
+      "message_center": false,
+      "message_alert": true,
+      "model": "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl",
+      "size": 0.01,
+      "offset_z": -2,
+      "offset_angle": 0
     }
   },
   "ConfigVersion": 1
 }
 ```
-
-TODO: configuration
 
 ## Compile Yourself
 
