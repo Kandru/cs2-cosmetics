@@ -11,169 +11,183 @@ namespace Cosmetics.Classes
         public override List<string> Events =>
         [
             "EventPlayerTeam",
-            "EventPlayerDisconnect"
+            "EventPlayerDisconnect",
+            "EventRoundStart"
         ];
         public override List<string> Listeners =>
         [
             "CheckTransmit",
-            "OnTick"
+            "OnTick",
+            "OnMapEnd"
         ];
         public override List<string> Precache =>
         [
-            "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl"
+            _config.Modules.SpectatorModel.Model
         ];
-        private readonly Dictionary<CCSPlayerController, int> _spectatorModelPlayers = [];
-        private readonly string _spectatorModel = "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl";
+        private readonly Dictionary<CCSPlayerController, CDynamicProp> _spectators = [];
 
         public SpectatorModel(PluginConfig Config) : base(Config)
         {
             Console.WriteLine("[Cosmetics] Initializing SpectatorModel module...");
+            // get spectators and spawn props for them
+            foreach (CCSPlayerController player in Utilities.GetPlayers().Where(static p => p.Team == CsTeam.Spectator))
+            {
+                if (player.Team == CsTeam.Spectator && !_spectators.ContainsKey(player))
+                {
+                    CDynamicProp? prop = SpawnProp(
+                        player,
+                        _config.Modules.SpectatorModel.Model,
+                        _config.Modules.SpectatorModel.Size
+                    );
+                    if (prop == null
+                        || !prop.IsValid)
+                    {
+                        continue;
+                    }
+                    _spectators.Add(player, prop);
+                }
+            }
         }
 
-        public new void Destroy()
+        public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying SpectatorModel module...");
+            foreach (CDynamicProp prop in _spectators.Values)
+            {
+                RemoveProp(prop, false);
+            }
+            _spectators.Clear();
         }
 
         public void OnTick()
         {
-            //bool hasSpectators = false;
-            foreach (CCSPlayerController player in Utilities.GetPlayers())
+            foreach (KeyValuePair<CCSPlayerController, CDynamicProp> kvp in _spectators.ToList())
             {
-                try
+                // sanity checks
+                if (!kvp.Key.IsValid
+                    || kvp.Key.Pawn?.Value?.IsValid != true
+                    || kvp.Key.Team != CsTeam.Spectator
+                    || kvp.Key.Pawn.Value.ObserverServices == null
+                    || !kvp.Value.IsValid)
                 {
-                    // sanity checks
-                    if (player == null
-                    || player.Pawn == null
-                    || player.Pawn.Value == null
-                    || !player.Pawn.IsValid
-                    || (player.Team != CsTeam.Spectator && !_spectatorModelPlayers.ContainsKey(player))
-                    )
+                    RemoveProp(kvp.Value, false);
+                    _ = _spectators.Remove(kvp.Key);
+                    continue;
+                }
+                if (kvp.Key.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)
+                {
+                    if (kvp.Value.AbsOrigin!.X != -999 && kvp.Value.AbsOrigin!.Y != -999 && kvp.Value.AbsOrigin!.Z != -999)
                     {
-                        continue;
-                    }
-                    // initial spawn
-                    if (!_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
-                    {
-                        //hasSpectators = true;
-                        // continue if player is currently not in correct roaming mode
-                        if (player.Pawn.Value.ObserverServices == null
-                            || player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)
-                        {
-                            continue;
-                        }
-                        // start transmission if nobody else has yet
-                        if (_spectatorModelPlayers.Count == 0)
-                        {
-                            // TODO: optimize loop by not using Utilities.GetPlayers() (performance hit otherwise)
-                            return;
-                        }
-                        // spawn prop
-                        _spectatorModelPlayers.Add(player,
-                            SpawnProp(
-                                player,
-                                _spectatorModel,
-                                0.03f
-                        ));
-                    }
-                    else if (_spectatorModelPlayers.TryGetValue(player, out int value)
-                        && (player.Pawn.Value.LifeState != (byte)LifeState_t.LIFE_DEAD
-                        || (player.Pawn.Value.ObserverServices != null && player.Pawn.Value.ObserverServices.ObserverMode != (byte)ObserverMode_t.OBS_MODE_ROAMING)))
-                    {
-                        //hasSpectators = true;
-                        RemoveProp(
-                            value,
-                            true
-                        );
-                        _ = _spectatorModelPlayers.Remove(player);
-                    }
-                    else if (_spectatorModelPlayers.ContainsKey(player) && player.Pawn.Value.LifeState == (byte)LifeState_t.LIFE_DEAD)
-                    {
-                        if (!UpdateProp(
-                            player,
-                            _spectatorModelPlayers[player],
-                            -10,
-                            0
-                        ))
-                        {
-                            //hasSpectators = true;
-                            _ = _spectatorModelPlayers.Remove(player);
-                        }
+                        RemoveProp(kvp.Value, true);
                     }
                 }
-                catch (Exception e)
+                else if (!UpdateProp(kvp.Key, kvp.Value, _config.Modules.SpectatorModel.OffsetZ, _config.Modules.SpectatorModel.OffsetAngle))
                 {
-                    Console.WriteLine(e);
-                    // TODO: proper error handling
+                    RemoveProp(kvp.Value, false);
+                    _ = _spectators.Remove(kvp.Key);
                 }
             }
         }
 
         public void CheckTransmit(CCheckTransmitInfoList infoList)
         {
-            // remove listener if no players to save resources
-            if (_spectatorModelPlayers.Count == 0)
+            if (_spectators.Count == 0)
             {
-                // TODO: proper handling
                 return;
             }
-            // worker
+            // remove prop for the player itself
             foreach ((CCheckTransmitInfo info, CCSPlayerController? player) in infoList)
             {
-                if (player == null)
+                if (player == null
+                    || !_spectators.TryGetValue(player, out CDynamicProp? prop)
+                    || prop == null
+                    || !prop.IsValid)
                 {
                     continue;
                 }
-
-                if (!_spectatorModelPlayers.ContainsKey(player))
-                {
-                    continue;
-                }
-
-                CDynamicProp? prop = Utilities.GetEntityFromIndex<CDynamicProp>(_spectatorModelPlayers[player]);
-                if (prop == null)
-                {
-                    continue;
-                }
-
                 info.TransmitEntities.Remove(prop);
             }
         }
 
         public HookResult EventPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
         {
-            if (@event.Team == (byte)CsTeam.Spectator)
+            CCSPlayerController? player = @event.Userid;
+            if (player == null
+                || !player.IsValid)
             {
-                // start listener if the first player joined spectator team
-                if (_spectatorModelPlayers.Count == 0)
+                return HookResult.Continue;
+            }
+            // create prop for spectator
+            if (@event.Team == (byte)CsTeam.Spectator && !_spectators.ContainsKey(player))
+            {
+                CDynamicProp? prop = SpawnProp(
+                    player,
+                    _config.Modules.SpectatorModel.Model,
+                    _config.Modules.SpectatorModel.Size
+                );
+                if (prop != null
+                    && prop.IsValid)
                 {
-                    // TODO: optimize loop by not using Utilities.GetPlayers() (performance hit otherwise)
+                    _spectators.Add(player, prop);
                 }
+            }
+            else if (@event.Team != (byte)CsTeam.Spectator && _spectators.TryGetValue(player, out _))
+            {
+                RemoveProp(_spectators[player], false);
+                _ = _spectators.Remove(player);
             }
             return HookResult.Continue;
         }
 
         public HookResult EventPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
         {
-            CCSPlayerController player = @event.Userid!;
-            if (_spectatorModelPlayers.TryGetValue(player, out int value))
+            CCSPlayerController? player = @event.Userid;
+            if (player == null
+                || !player.IsValid)
             {
-                RemoveProp(
-                    value,
-                    true
-                );
-                _ = _spectatorModelPlayers.Remove(player);
+                return HookResult.Continue;
+            }
+
+            if (_spectators.TryGetValue(player, out _))
+            {
+                RemoveProp(_spectators[player], false);
+                _ = _spectators.Remove(player);
             }
             return HookResult.Continue;
         }
 
-        private int SpawnProp(CCSPlayerController player, string model, float scale = 1.0f)
+        public HookResult EventRoundStart(EventRoundStart @event, GameEventInfo info)
+        {
+            // reset on round start
+            _spectators.Clear();
+            // get spectators and spawn props for them
+            foreach (CCSPlayerController player in Utilities.GetPlayers().Where(static p => p.Team == CsTeam.Spectator))
+            {
+                if (player.Team == CsTeam.Spectator && !_spectators.ContainsKey(player))
+                {
+                    CDynamicProp? prop = SpawnProp(
+                        player,
+                        _config.Modules.SpectatorModel.Model,
+                        _config.Modules.SpectatorModel.Size
+                    );
+                    if (prop == null
+                        || !prop.IsValid)
+                    {
+                        continue;
+                    }
+                    _spectators.Add(player, prop);
+                }
+            }
+            return HookResult.Continue;
+        }
+
+        private CDynamicProp? SpawnProp(CCSPlayerController player, string model, float scale = 1.0f)
         {
             // sanity checks
             if (player == null
             || player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null)
             {
-                return -1;
+                return null;
             }
             // create dynamic prop
             CDynamicProp prop;
@@ -185,7 +199,7 @@ namespace Cosmetics.Classes
             prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
             // spawn it
             prop.DispatchSpawn();
-            prop.SetModel(model);
+            prop.SetModel(_config.Modules.SpectatorModel.Model);
             prop.Teleport(new Vector(-999, -999, -999));
             // set random color
             prop.Render = Color.FromArgb(
@@ -196,19 +210,19 @@ namespace Cosmetics.Classes
             );
             prop.AnimGraphUpdateEnabled = false;
             prop.CBodyComponent!.SceneNode!.Scale = scale;
-            return (int)prop.Index;
+            return prop;
         }
 
-        private static bool UpdateProp(CCSPlayerController player, int index, int offset_z = 0, int offset_angle = 0)
+        private static bool UpdateProp(CCSPlayerController player, CDynamicProp prop, float offset_z = 0, float offset_angle = 0)
         {
-            CDynamicProp? prop = Utilities.GetEntityFromIndex<CDynamicProp>(index);
             // sanity checks
             if (prop == null
-            || prop.AbsRotation == null
-            || player == null
-            || player.Pawn == null
-            || player.Pawn.Value == null
-            || !player.Pawn.IsValid)
+                || !prop.IsValid
+                || prop.AbsRotation == null
+                || player == null
+                || player.Pawn == null
+                || player.Pawn.Value == null
+                || !player.Pawn.IsValid)
             {
                 return false;
             }
@@ -280,11 +294,11 @@ namespace Cosmetics.Classes
             return true;
         }
 
-        private static void RemoveProp(int index, bool softRemove = false)
+        private static void RemoveProp(CDynamicProp? prop, bool softRemove = false)
         {
-            CDynamicProp? prop = Utilities.GetEntityFromIndex<CDynamicProp>(index);
-            // remove plant entity
-            if (prop == null)
+            Console.WriteLine($"[Cosmetics] Removing prop {softRemove}");
+            if (prop == null
+                || !prop.IsValid)
             {
                 return;
             }
