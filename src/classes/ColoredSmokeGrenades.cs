@@ -43,28 +43,49 @@ namespace Cosmetics.Classes
                 {
                     return;
                 }
-
+                int r = 0, g = 0, b = 0;
                 if (owner.TeamNum == (byte)CsTeam.Terrorist)
                 {
-                    Color color = Color.FromArgb(255, _random.Next(30, 256), 0, 0);
-                    grenade.SmokeColor.X = color.R;
-                    grenade.SmokeColor.Y = color.G;
-                    grenade.SmokeColor.Z = color.B;
+                    if (!string.IsNullOrEmpty(_config.Modules.ColoredSmokeGrenades.ColorTerrorists))
+                    {
+                        var parts = _config.Modules.ColoredSmokeGrenades.ColorTerrorists.Split(' ');
+                        if (parts.Length == 3)
+                        {
+                            _ = int.TryParse(parts[0], out r);
+                            _ = int.TryParse(parts[1], out g);
+                            _ = int.TryParse(parts[2], out b);
+                        }
+                    }
                 }
                 else if (owner.TeamNum == (byte)CsTeam.CounterTerrorist)
                 {
-                    Color color = Color.FromArgb(0, 0, 0, _random.Next(30, 256));
-                    grenade.SmokeColor.X = color.R;
-                    grenade.SmokeColor.Y = color.G;
-                    grenade.SmokeColor.Z = color.B;
+                    if (!string.IsNullOrEmpty(_config.Modules.ColoredSmokeGrenades.ColorCounterTerrorists))
+                    {
+                        var parts = _config.Modules.ColoredSmokeGrenades.ColorCounterTerrorists.Split(' ');
+                        if (parts.Length == 3)
+                        {
+                            _ = int.TryParse(parts[0], out r);
+                            _ = int.TryParse(parts[1], out g);
+                            _ = int.TryParse(parts[2], out b);
+                        }
+                    }
                 }
                 else
                 {
-                    Color color = Color.FromArgb(0, 0, _random.Next(30, 256), 0);
-                    grenade.SmokeColor.X = color.R;
-                    grenade.SmokeColor.Y = color.G;
-                    grenade.SmokeColor.Z = color.B;
+                    if (!string.IsNullOrEmpty(_config.Modules.ColoredSmokeGrenades.ColorOther))
+                    {
+                        var parts = _config.Modules.ColoredSmokeGrenades.ColorOther.Split(' ');
+                        if (parts.Length == 3)
+                        {
+                            _ = int.TryParse(parts[0], out r);
+                            _ = int.TryParse(parts[1], out g);
+                            _ = int.TryParse(parts[2], out b);
+                        }
+                    }
                 }
+                grenade.SmokeColor.X = r;
+                grenade.SmokeColor.Y = g;
+                grenade.SmokeColor.Z = b;
             });
         }
     }
