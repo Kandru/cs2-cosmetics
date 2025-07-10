@@ -1,5 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
 {
@@ -10,7 +11,7 @@ namespace Cosmetics.Classes
             "EventBombPickup"
         ];
 
-        public BombModel(PluginConfig Config) : base(Config)
+        public BombModel(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
         {
             Console.WriteLine("[Cosmetics] Initializing BombModel module...");
         }

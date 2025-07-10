@@ -2,6 +2,7 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
+using Microsoft.Extensions.Localization;
 using System.Drawing;
 
 namespace Cosmetics.Classes
@@ -26,7 +27,7 @@ namespace Cosmetics.Classes
         ];
         private readonly Dictionary<CCSPlayerController, CDynamicProp> _spectators = [];
 
-        public SpectatorModel(PluginConfig Config) : base(Config)
+        public SpectatorModel(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
         {
             Console.WriteLine("[Cosmetics] Initializing SpectatorModel module...");
             // get spectators and spawn props for them
@@ -52,9 +53,9 @@ namespace Cosmetics.Classes
         public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying SpectatorModel module...");
-            foreach (CDynamicProp prop in _spectators.Values)
+            foreach (KeyValuePair<CCSPlayerController, CDynamicProp> kvp in _spectators.ToList())
             {
-                RemoveProp(prop, false);
+                RemoveProp(kvp.Key, kvp.Value, false);
             }
             _spectators.Clear();
         }
@@ -70,7 +71,7 @@ namespace Cosmetics.Classes
                     || kvp.Key.Pawn.Value.ObserverServices == null
                     || !kvp.Value.IsValid)
                 {
-                    RemoveProp(kvp.Value, false);
+                    RemoveProp(kvp.Key, kvp.Value, false);
                     _ = _spectators.Remove(kvp.Key);
                     continue;
                 }
@@ -78,12 +79,12 @@ namespace Cosmetics.Classes
                 {
                     if (kvp.Value.AbsOrigin!.X != -999 && kvp.Value.AbsOrigin!.Y != -999 && kvp.Value.AbsOrigin!.Z != -999)
                     {
-                        RemoveProp(kvp.Value, true);
+                        RemoveProp(kvp.Key, kvp.Value, true);
                     }
                 }
                 else if (!UpdateProp(kvp.Key, kvp.Value, _config.Modules.SpectatorModel.OffsetZ, _config.Modules.SpectatorModel.OffsetAngle))
                 {
-                    RemoveProp(kvp.Value, false);
+                    RemoveProp(kvp.Key, kvp.Value, false);
                     _ = _spectators.Remove(kvp.Key);
                 }
             }
@@ -133,7 +134,7 @@ namespace Cosmetics.Classes
             }
             else if (@event.Team != (byte)CsTeam.Spectator && _spectators.TryGetValue(player, out _))
             {
-                RemoveProp(_spectators[player], false);
+                RemoveProp(player, _spectators[player], false);
                 _ = _spectators.Remove(player);
             }
             return HookResult.Continue;
@@ -150,7 +151,7 @@ namespace Cosmetics.Classes
 
             if (_spectators.TryGetValue(player, out _))
             {
-                RemoveProp(_spectators[player], false);
+                RemoveProp(player, _spectators[player], false);
                 _ = _spectators.Remove(player);
             }
             return HookResult.Continue;
@@ -210,6 +211,18 @@ namespace Cosmetics.Classes
             );
             prop.AnimGraphUpdateEnabled = false;
             prop.CBodyComponent!.SceneNode!.Scale = scale;
+            if (_config.Modules.SpectatorModel.ChatMessage)
+            {
+                player.PrintToChat(_localizer["spectatormodel.message.chat"]);
+            }
+            if (_config.Modules.SpectatorModel.CenterMessage)
+            {
+                player.PrintToCenter(_localizer["spectatormodel.message.center"]);
+            }
+            else if (_config.Modules.SpectatorModel.AlertMessage)
+            {
+                player.PrintToCenterAlert(_localizer["spectatormodel.message.center"]);
+            }
             return prop;
         }
 
@@ -294,14 +307,14 @@ namespace Cosmetics.Classes
             return true;
         }
 
-        private static void RemoveProp(CDynamicProp? prop, bool softRemove = false)
+        private static void RemoveProp(CCSPlayerController? player, CDynamicProp? prop, bool softRemove = false)
         {
             if (prop == null
                 || !prop.IsValid)
             {
                 return;
             }
-
+            // remove prop
             if (softRemove)
             {
                 prop.Teleport(new Vector(-999, -999, -999));

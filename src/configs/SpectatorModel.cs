@@ -5,6 +5,9 @@ namespace Cosmetics.Configs
     public class SpectatorModelConfig
     {
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        [JsonPropertyName("message_chat")] public bool ChatMessage { get; set; } = true;
+        [JsonPropertyName("message_center")] public bool CenterMessage { get; set; } = true;
+        [JsonPropertyName("message_alert")] public bool AlertMessage { get; set; } = true;
         [JsonPropertyName("model")] public string Model { get; set; } = "models/vehicles/airplane_medium_01/airplane_medium_01_landed.vmdl";
         [JsonPropertyName("size")] public float Size { get; set; } = 0.01f;
         [JsonPropertyName("offset_z")] public float OffsetZ { get; set; } = -2f;

@@ -1,6 +1,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
 {
@@ -11,7 +12,7 @@ namespace Cosmetics.Classes
             "OnEntitySpawned"
         ];
 
-        public ColoredSmokeGrenades(PluginConfig Config) : base(Config)
+        public ColoredSmokeGrenades(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
         {
             Console.WriteLine("[Cosmetics] Initializing ColoredSmokeGrenades module...");
         }

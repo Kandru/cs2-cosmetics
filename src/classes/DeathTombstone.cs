@@ -2,6 +2,7 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
 {
@@ -16,7 +17,7 @@ namespace Cosmetics.Classes
             _config.Modules.DeathTombstone.Model
         ];
 
-        public DeathTombstone(PluginConfig Config) : base(Config)
+        public DeathTombstone(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
         {
             Console.WriteLine("[Cosmetics] Initializing DeathTombstone module...");
         }

@@ -94,22 +94,22 @@ namespace Cosmetics
             // initialize DeathBeam module
             if (config.Modules.DeathBeam.Enabled)
             {
-                _cosmetics.Add(new DeathBeam(config));
+                _cosmetics.Add(new DeathBeam(config, Localizer));
             }
             // initialize ColoredSmokeGrenades module
             if (config.Modules.ColoredSmokeGrenades.Enabled)
             {
-                _cosmetics.Add(new ColoredSmokeGrenades(config));
+                _cosmetics.Add(new ColoredSmokeGrenades(config, Localizer));
             }
             // initialize DeathTombstone module
             if (config.Modules.DeathTombstone.Enabled)
             {
-                _cosmetics.Add(new DeathTombstone(config));
+                _cosmetics.Add(new DeathTombstone(config, Localizer));
             }
             // initialize SpectatorModel module
             if (config.Modules.SpectatorModel.Enabled)
             {
-                _cosmetics.Add(new SpectatorModel(config));
+                _cosmetics.Add(new SpectatorModel(config, Localizer));
             }
             // register listeners
             RegisterListeners();

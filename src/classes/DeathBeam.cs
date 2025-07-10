@@ -2,6 +2,7 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using System.Drawing;
+using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
 {
@@ -37,7 +38,7 @@ namespace Cosmetics.Classes
         ];
         private readonly Dictionary<CCSPlayerController, Vector> _lastBulletImpact = [];
 
-        public DeathBeam(PluginConfig Config) : base(Config)
+        public DeathBeam(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
         {
             Console.WriteLine("[Cosmetics] Initializing DeathBeam module...");
         }

@@ -5,5 +5,7 @@
     "core.defaultconfig": "[Cosmetics] Found no map-specific configuration for {mapName}, using default one!",
     "core.foundconfig": "[Cosmetics] Found matching map-specific configuration for {mapName}!",
     "core.error": "{purple}[Cosmetics] {default}Error: {error}",
-    "core.disabled": "{purple}[Cosmetics] {default}is disabled!"
+    "core.disabled": "{purple}[Cosmetics] {default}is disabled!",
+    "spectatormodel.message.chat": "{purple}[Cosmetics] {default}Spectator model applied <3",
+    "spectatormodel.message.center": "Spectator model applied <3"
 }
