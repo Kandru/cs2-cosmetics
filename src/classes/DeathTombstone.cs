@@ -66,6 +66,17 @@ namespace Cosmetics.Classes
             }
             // teleport prop to position
             prop.Teleport(vector, angle);
+            // spawn timer to remove tombstone
+            if (_config.Modules.DeathTombstone.Timeout > 0)
+            {
+                _ = new CounterStrikeSharp.API.Modules.Timers.Timer(_config.Modules.DeathTombstone.Timeout, () =>
+                {
+                    if (prop != null && prop.IsValid)
+                    {
+                        prop.Remove();
+                    }
+                });
+            }
         }
     }
 }

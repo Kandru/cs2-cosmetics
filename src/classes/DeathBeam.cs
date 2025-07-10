@@ -75,16 +75,52 @@ namespace Cosmetics.Classes
             Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ - 5);
             // set end of beam to last bullet impact position if available
             Vector victimHitVector = _lastBulletImpact.TryGetValue(attacker, out Vector? value) ? value : victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
-            CreateBeam(attackerEyePos, victimHitVector, attacker.Team, 0.5f, 1.5f);
+            CreateBeam(attackerEyePos, victimHitVector, attacker.Team, _config.Modules.DeathBeam.Width, _config.Modules.DeathBeam.Timeout);
             return HookResult.Continue;
         }
 
-        private static void CreateBeam(Vector startOrigin, Vector endOrigin, CsTeam team = CsTeam.None, float width = 1f, float timeout = 2f)
+        private void CreateBeam(Vector startOrigin, Vector endOrigin, CsTeam team = CsTeam.None, float width = 1f, float timeout = 2f)
         {
             CEnvBeam beam = Utilities.CreateEntityByName<CEnvBeam>("env_beam")!;
             beam.Width = width;
-            beam.Render = team == CsTeam.CounterTerrorist ? Color.Blue : team == CsTeam.Terrorist ? Color.Red : Color.White;
-
+            Color color = Color.White;
+            if (team == CsTeam.CounterTerrorist && !string.IsNullOrEmpty(_config.Modules.DeathBeam.ColorCounterTerrorists))
+            {
+                int r = 0, g = 0, b = 0;
+                var parts = _config.Modules.DeathBeam.ColorCounterTerrorists.Split(' ');
+                if (parts.Length == 3)
+                {
+                    _ = int.TryParse(parts[0], out r);
+                    _ = int.TryParse(parts[1], out g);
+                    _ = int.TryParse(parts[2], out b);
+                }
+                color = Color.FromArgb(r, g, b);
+            }
+            else if (team == CsTeam.Terrorist && !string.IsNullOrEmpty(_config.Modules.DeathBeam.ColorTerrorists))
+            {
+                int r = 0, g = 0, b = 0;
+                var parts = _config.Modules.DeathBeam.ColorTerrorists.Split(' ');
+                if (parts.Length == 3)
+                {
+                    _ = int.TryParse(parts[0], out r);
+                    _ = int.TryParse(parts[1], out g);
+                    _ = int.TryParse(parts[2], out b);
+                }
+                color = Color.FromArgb(r, g, b);
+            }
+            else if (!string.IsNullOrEmpty(_config.Modules.DeathBeam.ColorOther))
+            {
+                int r = 0, g = 0, b = 0;
+                var parts = _config.Modules.DeathBeam.ColorOther.Split(' ');
+                if (parts.Length == 3)
+                {
+                    _ = int.TryParse(parts[0], out r);
+                    _ = int.TryParse(parts[1], out g);
+                    _ = int.TryParse(parts[2], out b);
+                }
+                color = Color.FromArgb(r, g, b);
+            }
+            beam.Render = color;
             beam.SetModel("materials/sprites/laserbeam.vtex");
             beam.Teleport(startOrigin);
             beam.EndPos.X = endOrigin.X;
