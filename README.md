@@ -30,7 +30,44 @@ Updating is even easier: simply overwrite all plugin files and they will be relo
 This plugin automatically creates a readable JSON configuration file. This configuration file can be found in `/addons/counterstrikesharp/configs/plugins/Cosmetics/Cosmetics.json`. Each map can have a unique configuration file. This can be achieved by creating a subfolder called `maps` next to the `Cosmetics.json`and copy the current `Cosmetics.json` as my_lowercase_map_name.json. Upon map-change this configuration file will be loaded. In case of an error within the .json file the server console will give you more information.
 
 ```json
-
+{
+  "enabled": true,
+  "debug": false,
+  "modules": {
+    "bombmodel": {
+      "enabled": true,
+      "change_size_on_planted_c4": true,
+      "change_size_on_equip_c4": true,
+      "min_size": 3,
+      "max_size": 7
+    },
+    "coloredsmokegrenades": {
+      "enabled": true,
+      "color_t": "255 0 0",
+      "color_ct": "0 0 255",
+      "color_other": "0 255 0"
+    },
+    "deathbeam": {
+      "enabled": true,
+      "timeout": 1.5,
+      "width": 0.5,
+      "color_t": "237 163 56",
+      "color_ct": "104 163 229",
+      "color_other": "0 255 0"
+    },
+    "deathtombstone": {
+      "enabled": true,
+      "timeout": 0,
+      "model": "models/cs2/kandru/tombstone.vmdl",
+      "size": 1,
+      "health": 100
+    },
+    "spectatormodel": {
+      "enabled": true
+    }
+  },
+  "ConfigVersion": 1
+}
 ```
 
 TODO: configuration
