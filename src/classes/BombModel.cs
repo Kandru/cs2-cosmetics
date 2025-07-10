@@ -22,6 +22,10 @@ namespace Cosmetics.Classes
 
         public HookResult EventBombPlanted(EventBombPlanted @event, GameEventInfo info)
         {
+            if (!_config.Modules.BombModel.ChangeSizeOnPlant)
+            {
+                return HookResult.Continue;
+            }
             // delay one frame to allow c4 model to exist
             Server.NextFrame(() => ChangeBombScale("planted_c4"));
             return HookResult.Continue;
@@ -29,6 +33,10 @@ namespace Cosmetics.Classes
 
         public HookResult EventBombPickup(EventBombPickup @event, GameEventInfo info)
         {
+            if (!_config.Modules.BombModel.ChangeSizeOnEquip)
+            {
+                return HookResult.Continue;
+            }
             // delay one frame to allow c4 model to exist
             Server.NextFrame(() => ChangeBombScale("weapon_c4"));
             return HookResult.Continue;
