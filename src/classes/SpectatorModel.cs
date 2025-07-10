@@ -296,7 +296,6 @@ namespace Cosmetics.Classes
 
         private static void RemoveProp(CDynamicProp? prop, bool softRemove = false)
         {
-            Console.WriteLine($"[Cosmetics] Removing prop {softRemove}");
             if (prop == null
                 || !prop.IsValid)
             {
