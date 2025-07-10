@@ -11,14 +11,13 @@ namespace Cosmetics.Classes
         [
             "EventPlayerDeath"
         ];
+        public override List<string> Precache =>
+        [
+            _config.Modules.DeathTombstone.Model
+        ];
 
         public DeathTombstone(PluginConfig Config) : base(Config)
         {
-            // add model to precache list
-            if (!string.IsNullOrEmpty(_config.Modules.DeathTombstone.Model))
-            {
-                Precache.Add(_config.Modules.DeathTombstone.Model);
-            }
             Console.WriteLine("[Cosmetics] Initializing DeathTombstone module...");
         }
 
