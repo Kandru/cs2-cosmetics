@@ -31,9 +31,6 @@ namespace Cosmetics
                 Config.Update();
                 // initialize modules
                 InitializeModules();
-                // register listeners
-                RegisterListeners();
-                RegisterEventHandlers();
             }
         }
 
@@ -43,9 +40,6 @@ namespace Cosmetics
             RemoveListener<Listeners.OnServerPrecacheResources>(OnServerPrecacheResources);
             RemoveListener<Listeners.OnMapStart>(OnMapStart);
             RemoveListener<Listeners.OnMapEnd>(OnMapEnd);
-            // deregister listeners
-            DeregisterListeners();
-            DeregisterEventHandlers();
             // destroy modules
             DestroyModules();
             Console.WriteLine(Localizer["core.unload"]);
@@ -53,12 +47,11 @@ namespace Cosmetics
 
         private void OnServerPrecacheResources(ResourceManifest manifest)
         {
-            // initialize modules (otherwise no models are precached)
-            InitializeModules();
             // precache resources for all cosmetics modules
             DebugPrint("Pre-caching resources for cosmetics modules...");
             foreach (ParentModule module in _cosmetics)
             {
+                DebugPrint($"Module {module.GetType().Name} has {module.Precache.Count} resources to precache.");
                 foreach (string model in module.Precache)
                 {
                     DebugPrint($"Pre-caching model: {model}");
@@ -75,16 +68,10 @@ namespace Cosmetics
             LoadConfig(mapName);
             // initialize modules
             InitializeModules();
-            // register listeners
-            RegisterListeners();
-            RegisterEventHandlers();
         }
 
         private void OnMapEnd()
         {
-            // deregister listeners
-            DeregisterListeners();
-            DeregisterEventHandlers();
             // destroy modules
             DestroyModules();
             // reset map-specific configuration
@@ -124,6 +111,9 @@ namespace Cosmetics
             {
                 _cosmetics.Add(new SpectatorModel(config));
             }
+            // register listeners
+            RegisterListeners();
+            RegisterEventHandlers();
         }
 
         private void RegisterListeners()
@@ -308,6 +298,10 @@ namespace Cosmetics
 
         private void DestroyModules()
         {
+            DebugPrint("Destroying all modules...");
+            // deregister listeners
+            DeregisterListeners();
+            DeregisterEventHandlers();
             // destroy all cosmetics modules
             foreach (ParentModule module in _cosmetics)
             {
