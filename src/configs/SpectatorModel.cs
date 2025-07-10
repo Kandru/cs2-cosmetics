@@ -4,6 +4,6 @@ namespace Cosmetics.Configs
 {
     public class SpectatorModelConfig
     {
-        [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
+        [JsonPropertyName("enabled")] public bool Enabled { get; set; } = false;
     }
 }
