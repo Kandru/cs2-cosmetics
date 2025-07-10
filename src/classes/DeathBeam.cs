@@ -42,7 +42,7 @@ namespace Cosmetics.Classes
             Console.WriteLine("[Cosmetics] Initializing DeathBeam module...");
         }
 
-        public new void Destroy()
+        public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying DeathBeam module...");
         }

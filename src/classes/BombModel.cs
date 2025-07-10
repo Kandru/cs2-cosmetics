@@ -15,7 +15,7 @@ namespace Cosmetics.Classes
             Console.WriteLine("[Cosmetics] Initializing BombModel module...");
         }
 
-        public new void Destroy()
+        public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying BombModel module...");
         }

@@ -21,7 +21,7 @@ namespace Cosmetics.Classes
             Console.WriteLine("[Cosmetics] Initializing DeathTombstone module...");
         }
 
-        public new void Destroy()
+        public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying DeathTombstone module...");
         }

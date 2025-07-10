@@ -17,7 +17,7 @@ namespace Cosmetics.Classes
             Console.WriteLine("[Cosmetics] Initializing ColoredSmokeGrenades module...");
         }
 
-        public new void Destroy()
+        public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying ColoredSmokeGrenades module...");
         }
