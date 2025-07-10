@@ -1,7 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using System.Drawing;
 
 namespace Cosmetics.Classes
 {
@@ -48,7 +47,7 @@ namespace Cosmetics.Classes
                 {
                     if (!string.IsNullOrEmpty(_config.Modules.ColoredSmokeGrenades.ColorTerrorists))
                     {
-                        var parts = _config.Modules.ColoredSmokeGrenades.ColorTerrorists.Split(' ');
+                        string[] parts = _config.Modules.ColoredSmokeGrenades.ColorTerrorists.Split(' ');
                         if (parts.Length == 3)
                         {
                             _ = int.TryParse(parts[0], out r);
@@ -61,7 +60,7 @@ namespace Cosmetics.Classes
                 {
                     if (!string.IsNullOrEmpty(_config.Modules.ColoredSmokeGrenades.ColorCounterTerrorists))
                     {
-                        var parts = _config.Modules.ColoredSmokeGrenades.ColorCounterTerrorists.Split(' ');
+                        string[] parts = _config.Modules.ColoredSmokeGrenades.ColorCounterTerrorists.Split(' ');
                         if (parts.Length == 3)
                         {
                             _ = int.TryParse(parts[0], out r);
@@ -74,7 +73,7 @@ namespace Cosmetics.Classes
                 {
                     if (!string.IsNullOrEmpty(_config.Modules.ColoredSmokeGrenades.ColorOther))
                     {
-                        var parts = _config.Modules.ColoredSmokeGrenades.ColorOther.Split(' ');
+                        string[] parts = _config.Modules.ColoredSmokeGrenades.ColorOther.Split(' ');
                         if (parts.Length == 3)
                         {
                             _ = int.TryParse(parts[0], out r);

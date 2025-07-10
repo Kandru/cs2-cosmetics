@@ -162,7 +162,7 @@ namespace Cosmetics
             Delegate handler = Delegate.CreateDelegate(listenerType, module, method);
             // use reflection to call RegisterListener<T>
             MethodInfo? registerMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(m => m.Name == "RegisterListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
+                .FirstOrDefault(static m => m.Name == "RegisterListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
             if (registerMethod == null)
             {
                 DebugPrint("RegisterListener method not found.");
@@ -192,7 +192,7 @@ namespace Cosmetics
             Delegate handler = Delegate.CreateDelegate(listenerType, module, method);
             // use reflection to call RemoveListener<T>
             MethodInfo? removeMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(m => m.Name == "RemoveListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
+                .FirstOrDefault(static m => m.Name == "RemoveListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
             if (removeMethod == null)
             {
                 DebugPrint("RemoveListener method not found.");
@@ -252,7 +252,7 @@ namespace Cosmetics
 
             // use reflection to call RegisterEventHandler<T>
             MethodInfo? registerMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(m => m.Name == "RegisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
+                .FirstOrDefault(static m => m.Name == "RegisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
             if (registerMethod == null)
             {
                 DebugPrint("RegisterEventHandler method not found.");
@@ -286,7 +286,7 @@ namespace Cosmetics
 
             // use reflection to call DeregisterEventHandler<T>
             MethodInfo? deregisterMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(m => m.Name == "DeregisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
+                .FirstOrDefault(static m => m.Name == "DeregisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
             if (deregisterMethod == null)
             {
                 DebugPrint("DeregisterEventHandler method not found.");

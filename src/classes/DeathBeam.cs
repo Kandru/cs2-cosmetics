@@ -87,7 +87,7 @@ namespace Cosmetics.Classes
             if (team == CsTeam.CounterTerrorist && !string.IsNullOrEmpty(_config.Modules.DeathBeam.ColorCounterTerrorists))
             {
                 int r = 0, g = 0, b = 0;
-                var parts = _config.Modules.DeathBeam.ColorCounterTerrorists.Split(' ');
+                string[] parts = _config.Modules.DeathBeam.ColorCounterTerrorists.Split(' ');
                 if (parts.Length == 3)
                 {
                     _ = int.TryParse(parts[0], out r);
@@ -99,7 +99,7 @@ namespace Cosmetics.Classes
             else if (team == CsTeam.Terrorist && !string.IsNullOrEmpty(_config.Modules.DeathBeam.ColorTerrorists))
             {
                 int r = 0, g = 0, b = 0;
-                var parts = _config.Modules.DeathBeam.ColorTerrorists.Split(' ');
+                string[] parts = _config.Modules.DeathBeam.ColorTerrorists.Split(' ');
                 if (parts.Length == 3)
                 {
                     _ = int.TryParse(parts[0], out r);
@@ -111,7 +111,7 @@ namespace Cosmetics.Classes
             else if (!string.IsNullOrEmpty(_config.Modules.DeathBeam.ColorOther))
             {
                 int r = 0, g = 0, b = 0;
-                var parts = _config.Modules.DeathBeam.ColorOther.Split(' ');
+                string[] parts = _config.Modules.DeathBeam.ColorOther.Split(' ');
                 if (parts.Length == 3)
                 {
                     _ = int.TryParse(parts[0], out r);
