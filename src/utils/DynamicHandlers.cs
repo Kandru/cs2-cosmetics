@@ -1,7 +1,7 @@
 using Cosmetics.Classes;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.UserMessages;
 using System.Reflection;
-
 
 namespace Cosmetics.Utils
 {
@@ -121,6 +121,54 @@ namespace Cosmetics.Utils
             }
             MethodInfo genericDeregisterMethod = deregisterMethod.MakeGenericMethod(eventType);
             _ = genericDeregisterMethod.Invoke(basePlugin, [handler, HookMode.Pre]);
+        }
+
+        public static void RegisterUserMessageHook(BasePlugin basePlugin, int messageId, ParentModule module, HookMode hookMode)
+        {
+            // get the method from the module
+            MethodInfo? method = module.GetType().GetMethod($"HookUserMessage{messageId}");
+            if (method == null)
+            {
+                Console.WriteLine("[DynamicHandlers] Method not found for UserMessage ID: " + messageId);
+                return;
+            }
+
+            // create delegate using UserMessage.UserMessageHandler - not Func<UserMessage, HookResult>
+            Type delegateType = typeof(UserMessage.UserMessageHandler);
+            Delegate handler = Delegate.CreateDelegate(delegateType, module, method);
+
+            // use reflection to call HookUserMessage with correct signature
+            MethodInfo? hookMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(static m => m.Name == "HookUserMessage" && m.GetParameters().Length == 3);
+            if (hookMethod == null)
+            {
+                Console.WriteLine("[DynamicHandlers] HookUserMessage method not found.");
+                return;
+            }
+            _ = hookMethod.Invoke(basePlugin, [messageId, handler, hookMode]);
+        }
+
+        public static void DeregisterUserMessageHook(BasePlugin basePlugin, int messageId, ParentModule module, HookMode hookMode)
+        {
+            // get the method from the module
+            MethodInfo? method = module.GetType().GetMethod($"HookUserMessage{messageId}");
+            if (method == null)
+            {
+                return;
+            }
+
+            // create delegate using UserMessage.UserMessageHandler - not Func<UserMessage, HookResult>
+            Type delegateType = typeof(UserMessage.UserMessageHandler);
+            Delegate handler = Delegate.CreateDelegate(delegateType, module, method);
+
+            // use reflection to call UnhookUserMessage with correct signature
+            MethodInfo? unhookMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(static m => m.Name == "UnhookUserMessage" && m.GetParameters().Length == 3);
+            if (unhookMethod == null)
+            {
+                return;
+            }
+            _ = unhookMethod.Invoke(basePlugin, [messageId, handler, hookMode]);
         }
     }
 }

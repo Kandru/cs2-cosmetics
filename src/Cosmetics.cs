@@ -114,6 +114,7 @@ namespace Cosmetics
             // register listeners
             RegisterListeners();
             RegisterEventHandlers();
+            RegisterUserMessageHooks();
         }
 
         private void RegisterListeners()
@@ -168,12 +169,39 @@ namespace Cosmetics
             }
         }
 
+        private void RegisterUserMessageHooks()
+        {
+            foreach (ParentModule module in _cosmetics)
+            {
+                DebugPrint($"Registering user messages for module {module.GetType().Name}");
+                foreach ((int userMessageId, HookMode hookMode) in module.UserMessages)
+                {
+                    DebugPrint($"- UserMessage ID: {userMessageId}, HookMode: {hookMode}");
+                    DynamicHandlers.RegisterUserMessageHook(this, userMessageId, module, hookMode);
+                }
+            }
+        }
+
+        private void DeregisterUserMessageHooks()
+        {
+            foreach (ParentModule module in _cosmetics)
+            {
+                DebugPrint($"Deregistering user messages for module {module.GetType().Name}");
+                foreach ((int userMessageId, HookMode hookMode) in module.UserMessages)
+                {
+                    DebugPrint($"- UserMessage ID: {userMessageId}, HookMode: {hookMode}");
+                    DynamicHandlers.DeregisterUserMessageHook(this, userMessageId, module, hookMode);
+                }
+            }
+        }
+
         private void DestroyModules()
         {
             DebugPrint("Destroying all modules...");
             // deregister listeners
             DeregisterListeners();
             DeregisterEventHandlers();
+            DeregisterUserMessageHooks();
             // destroy all cosmetics modules
             foreach (ParentModule module in _cosmetics)
             {

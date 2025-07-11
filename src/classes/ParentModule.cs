@@ -1,3 +1,4 @@
+using CounterStrikeSharp.API.Core;
 using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
@@ -8,6 +9,7 @@ namespace Cosmetics.Classes
         public readonly IStringLocalizer _localizer = Localizer;
         public virtual List<string> Events => [];
         public virtual List<string> Listeners => [];
+        public virtual Dictionary<int, HookMode> UserMessages => [];
         public virtual List<string> Precache => [];
         public readonly Random _random = new();
 
