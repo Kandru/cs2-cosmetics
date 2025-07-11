@@ -1,8 +1,8 @@
 ﻿using Cosmetics.Classes;
+using Cosmetics.Utils;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Extensions;
 using CounterStrikeSharp.API.Modules.Utils;
-using System.Reflection;
 
 namespace Cosmetics
 {
@@ -124,7 +124,7 @@ namespace Cosmetics
                 foreach (string listenerName in module.Listeners)
                 {
                     DebugPrint($"- {listenerName}");
-                    RegisterModuleListener(listenerName, module);
+                    DynamicHandlers.RegisterModuleListener(this, listenerName, module);
                 }
             }
         }
@@ -137,69 +137,9 @@ namespace Cosmetics
                 foreach (string listenerName in module.Listeners)
                 {
                     DebugPrint($"- {listenerName}");
-                    DeregisterModuleListener(listenerName, module);
+                    DynamicHandlers.DeregisterModuleListener(this, listenerName, module);
                 }
             }
-        }
-
-        private void RegisterModuleListener(string listenerName, ParentModule module)
-        {
-            // get the listener type from CounterStrikeSharp.API.Core.Listeners
-            Type? listenerType = typeof(Listeners).GetNestedType(listenerName);
-            if (listenerType == null)
-            {
-                DebugPrint($"Listener type {listenerName} not found");
-                return;
-            }
-            // get the method from the module
-            MethodInfo? method = module.GetType().GetMethod(listenerName);
-            if (method == null)
-            {
-                DebugPrint($"Method {listenerName} not found in module {module.GetType().Name}");
-                return;
-            }
-            // create delegate
-            Delegate handler = Delegate.CreateDelegate(listenerType, module, method);
-            // use reflection to call RegisterListener<T>
-            MethodInfo? registerMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(static m => m.Name == "RegisterListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
-            if (registerMethod == null)
-            {
-                DebugPrint("RegisterListener method not found.");
-                return;
-            }
-            MethodInfo genericRegisterMethod = registerMethod.MakeGenericMethod(listenerType);
-            _ = genericRegisterMethod.Invoke(this, [handler]);
-        }
-
-        private void DeregisterModuleListener(string listenerName, ParentModule module)
-        {
-            // get the listener type from CounterStrikeSharp.API.Core.Listeners
-            Type? listenerType = typeof(Listeners).GetNestedType(listenerName);
-            if (listenerType == null)
-            {
-                DebugPrint($"Listener type {listenerName} not found");
-                return;
-            }
-            // get the method from the module
-            MethodInfo? method = module.GetType().GetMethod(listenerName);
-            if (method == null)
-            {
-                DebugPrint($"Method {listenerName} not found in module {module.GetType().Name}");
-                return;
-            }
-            // create delegate
-            Delegate handler = Delegate.CreateDelegate(listenerType, module, method);
-            // use reflection to call RemoveListener<T>
-            MethodInfo? removeMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(static m => m.Name == "RemoveListener" && m.IsGenericMethodDefinition && m.GetParameters().Length == 1);
-            if (removeMethod == null)
-            {
-                DebugPrint("RemoveListener method not found.");
-                return;
-            }
-            MethodInfo genericRemoveMethod = removeMethod.MakeGenericMethod(listenerType);
-            _ = genericRemoveMethod.Invoke(this, [handler]);
         }
 
         private void RegisterEventHandlers()
@@ -210,7 +150,7 @@ namespace Cosmetics
                 foreach (string eventName in module.Events)
                 {
                     DebugPrint($"- {eventName}");
-                    RegisterModuleEventHandler(eventName, module);
+                    DynamicHandlers.RegisterModuleEventHandler(this, eventName, module);
                 }
             }
         }
@@ -223,77 +163,9 @@ namespace Cosmetics
                 foreach (string eventName in module.Events)
                 {
                     DebugPrint($"- {eventName}");
-                    DeregisterModuleEventHandler(eventName, module);
+                    DynamicHandlers.DeregisterModuleEventHandler(this, eventName, module);
                 }
             }
-        }
-
-        private void RegisterModuleEventHandler(string eventName, ParentModule module)
-        {
-            // get the event type from CounterStrikeSharp.API.Core
-            Type? eventType = typeof(BasePlugin).Assembly.GetType($"CounterStrikeSharp.API.Core.{eventName}");
-            if (eventType == null)
-            {
-                DebugPrint($"Event type {eventName} not found");
-                return;
-            }
-
-            // get the method from the module
-            MethodInfo? method = module.GetType().GetMethod(eventName);
-            if (method == null)
-            {
-                DebugPrint($"Method {eventName} not found in module {module.GetType().Name}");
-                return;
-            }
-
-            // create delegate using Func<T, GameEventInfo, HookResult> for event handlers
-            Type gameEventHandlerType = typeof(BasePlugin).GetNestedType("GameEventHandler`1")!.MakeGenericType(eventType);
-            Delegate handler = Delegate.CreateDelegate(gameEventHandlerType, module, method);
-
-            // use reflection to call RegisterEventHandler<T>
-            MethodInfo? registerMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(static m => m.Name == "RegisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
-            if (registerMethod == null)
-            {
-                DebugPrint("RegisterEventHandler method not found.");
-                return;
-            }
-            MethodInfo genericRegisterMethod = registerMethod.MakeGenericMethod(eventType);
-            _ = genericRegisterMethod.Invoke(this, [handler, HookMode.Pre]);
-        }
-
-        private void DeregisterModuleEventHandler(string eventName, ParentModule module)
-        {
-            // get the event type from CounterStrikeSharp.API.Core
-            Type? eventType = typeof(BasePlugin).Assembly.GetType($"CounterStrikeSharp.API.Core.{eventName}");
-            if (eventType == null)
-            {
-                DebugPrint($"Event type {eventName} not found");
-                return;
-            }
-
-            // get the method from the module
-            MethodInfo? method = module.GetType().GetMethod(eventName);
-            if (method == null)
-            {
-                DebugPrint($"Method {eventName} not found in module {module.GetType().Name}");
-                return;
-            }
-
-            // create delegate using BasePlugin.GameEventHandler<T>
-            Type gameEventHandlerType = typeof(BasePlugin).GetNestedType("GameEventHandler`1")!.MakeGenericType(eventType);
-            Delegate handler = Delegate.CreateDelegate(gameEventHandlerType, module, method);
-
-            // use reflection to call DeregisterEventHandler<T>
-            MethodInfo? deregisterMethod = typeof(BasePlugin).GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(static m => m.Name == "DeregisterEventHandler" && m.IsGenericMethodDefinition && m.GetParameters().Length == 2);
-            if (deregisterMethod == null)
-            {
-                DebugPrint("DeregisterEventHandler method not found.");
-                return;
-            }
-            MethodInfo genericDeregisterMethod = deregisterMethod.MakeGenericMethod(eventType);
-            _ = genericDeregisterMethod.Invoke(this, [handler, HookMode.Pre]);
         }
 
         private void DestroyModules()
