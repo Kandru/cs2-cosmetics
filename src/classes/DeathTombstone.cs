@@ -6,7 +6,7 @@ using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
 {
-    public partial class DeathTombstone : ParentModule
+    public class DeathTombstone : ParentModule
     {
         public override List<string> Events =>
         [

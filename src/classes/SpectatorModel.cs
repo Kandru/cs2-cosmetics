@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace Cosmetics.Classes
 {
-    public partial class SpectatorModel : ParentModule
+    public class SpectatorModel : ParentModule
     {
         public override List<string> Events =>
         [
