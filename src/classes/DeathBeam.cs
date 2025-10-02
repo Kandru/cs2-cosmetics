@@ -73,7 +73,8 @@ namespace Cosmetics.Classes
                 return HookResult.Continue;
             }
             // create beam from attackers eye position
-            Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ == 0 ? 65 - 5 : attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ - 5);
+            float playerViewOffsetZ = attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ == 0 ? (attacker.Buttons & PlayerButtons.Duck) != 0 ? 40 : 60 : attacker.Pawn.Value.CameraServices.OldPlayerViewOffsetZ - 5;
+            Vector attackerEyePos = attacker.Pawn.Value.AbsOrigin! + new Vector(0, 0, playerViewOffsetZ);
             // set end of beam to last bullet impact position if available
             Vector victimHitVector = _lastBulletImpact.TryGetValue(attacker, out Vector? value) ? value : victim.Pawn.Value.AbsOrigin! + new Vector(0, 0, 40);
             CreateBeam(attackerEyePos, victimHitVector, attacker.Team, _config.Modules.DeathBeam.Width, _config.Modules.DeathBeam.Timeout);
