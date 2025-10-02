@@ -1,3 +1,6 @@
+> [!TIP]
+> You can test this plug-in by joining our community server via `connect server.counterstrike.party:27030` or via https://counterstrike.party
+
 # CounterstrikeSharp - Cosmetics
 
 [![UpdateManager Compatible](https://img.shields.io/badge/CS2-UpdateManager-darkgreen)](https://github.com/Kandru/cs2-update-manager/)
