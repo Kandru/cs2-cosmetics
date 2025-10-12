@@ -40,8 +40,17 @@ namespace Cosmetics.Classes
 
         private void SpawnTombstone(Vector vector, QAngle angle)
         {
-            // create pole prop
-            CPhysicsProp? prop = Utilities.CreateEntityByName<CPhysicsProp>("prop_physics_override");
+            // create prop
+            CBreakableProp? prop = null;
+            if (_config.Modules.DeathTombstone.HitboxEnabled)
+            {
+                prop = Utilities.CreateEntityByName<CBreakableProp>("prop_physics_override");
+            }
+            else
+            {
+                prop = Utilities.CreateEntityByName<CBreakableProp>("prop_dynamic_override");
+            }
+
             if (prop == null
                 || !prop.IsValid)
             {
@@ -58,8 +67,8 @@ namespace Cosmetics.Classes
             else
             {
                 prop.Collision.SolidType = SolidType_t.SOLID_NONE;
-                prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
-                prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
+                prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NEVER;
+                prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NEVER;
             }
             prop.DispatchSpawn();
             prop.SetModel(_config.Modules.DeathTombstone.Model);
