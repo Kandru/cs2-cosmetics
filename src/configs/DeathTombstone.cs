@@ -7,6 +7,7 @@ namespace Cosmetics.Configs
         [JsonPropertyName("enabled")] public bool Enabled { get; set; } = true;
         [JsonPropertyName("timeout")] public float Timeout { get; set; } = 0f;
         [JsonPropertyName("model")] public string Model { get; set; } = "models/cs2/kandru/tombstone.vmdl";
+        [JsonPropertyName("hitbox_enabled")] public bool HitboxEnabled { get; set; } = false;
         [JsonPropertyName("size")] public float Size { get; set; } = 1.0f;
         [JsonPropertyName("health")] public int Health { get; set; } = 100;
     }

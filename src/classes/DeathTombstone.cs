@@ -49,14 +49,24 @@ namespace Cosmetics.Classes
             }
             // set attributes
             prop.MoveType = MoveType_t.MOVETYPE_VPHYSICS;
-            prop.Collision.SolidType = SolidType_t.SOLID_VPHYSICS;
-            prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEFAULT;
-            prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEFAULT;
+            if (_config.Modules.DeathTombstone.HitboxEnabled)
+            {
+                prop.Collision.SolidType = SolidType_t.SOLID_VPHYSICS;
+                prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEFAULT;
+                prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DEFAULT;
+            }
+            else
+            {
+                prop.Collision.SolidType = SolidType_t.SOLID_NONE;
+                prop.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
+                prop.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_NONE;
+            }
             prop.DispatchSpawn();
             prop.SetModel(_config.Modules.DeathTombstone.Model);
             prop.CBodyComponent!.SceneNode!.Scale = _config.Modules.DeathTombstone.Size;
             // give prop some health
-            if (_config.Modules.DeathTombstone.Health > 0)
+            if (_config.Modules.DeathTombstone.HitboxEnabled
+                && _config.Modules.DeathTombstone.Health > 0)
             {
                 prop.MaxHealth = _config.Modules.DeathTombstone.Health;
                 prop.Health = _config.Modules.DeathTombstone.Health;
