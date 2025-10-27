@@ -8,7 +8,7 @@ namespace Cosmetics.Classes
     {
         public override List<string> Events => [
             "EventBombPlanted",
-            "EventBombPickup"
+            "EventBombDropped"
         ];
 
         public BombModel(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
@@ -32,7 +32,7 @@ namespace Cosmetics.Classes
             return HookResult.Continue;
         }
 
-        public HookResult EventBombPickup(EventBombPickup @event, GameEventInfo info)
+        public HookResult EventBombDropped(EventBombDropped @event, GameEventInfo info)
         {
             if (!_config.Modules.BombModel.ChangeSizeOnEquip)
             {
@@ -52,6 +52,8 @@ namespace Cosmetics.Classes
                 float randomScale = (float)((new Random().NextDouble() *
                     (_config.Modules.BombModel.MaxSize - _config.Modules.BombModel.MinSize)) + _config.Modules.BombModel.MinSize);
                 bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().Scale = randomScale;
+                bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().AbsScale = randomScale;
+                return;
             }
         }
     }

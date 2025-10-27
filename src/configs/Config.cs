@@ -9,6 +9,7 @@ namespace Cosmetics
     public class ModuleConfig
     {
         [JsonPropertyName("bombmodel")] public BombModelConfig BombModel { get; set; } = new BombModelConfig();
+        [JsonPropertyName("bombhighlight")] public BombHighlightConfig BombHighlight { get; set; } = new BombHighlightConfig();
         [JsonPropertyName("coloredsmokegrenades")] public ColoredSmokeGrenadesConfig ColoredSmokeGrenades { get; set; } = new ColoredSmokeGrenadesConfig();
         [JsonPropertyName("deathbeam")] public DeathbeamConfig DeathBeam { get; set; } = new DeathbeamConfig();
         [JsonPropertyName("deathtombstone")] public DeathTombstoneConfig DeathTombstone { get; set; } = new DeathTombstoneConfig();

@@ -96,6 +96,11 @@ namespace Cosmetics
             {
                 _cosmetics.Add(new BombModel(config, Localizer));
             }
+            // initialize BombHighlight module
+            if (config.Modules.BombHighlight.Enabled)
+            {
+                _cosmetics.Add(new BombHighlight(config, Localizer));
+            }
             // initialize DeathBeam module
             if (config.Modules.DeathBeam.Enabled)
             {
