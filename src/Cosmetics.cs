@@ -91,6 +91,11 @@ namespace Cosmetics
             {
                 return;
             }
+            // initialize BombModel module
+            if (config.Modules.BombModel.Enabled)
+            {
+                _cosmetics.Add(new BombModel(config, Localizer));
+            }
             // initialize DeathBeam module
             if (config.Modules.DeathBeam.Enabled)
             {
