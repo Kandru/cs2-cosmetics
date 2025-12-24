@@ -1,5 +1,6 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Localization;
 
 namespace Cosmetics.Classes
@@ -28,7 +29,7 @@ namespace Cosmetics.Classes
                 return HookResult.Continue;
             }
             // delay one frame to allow c4 model to exist
-            Server.NextFrame(() => ChangeBombScale("planted_c4"));
+            Server.NextFrame(() => ChangeBombScale("planted_c4", false));
             return HookResult.Continue;
         }
 
@@ -39,11 +40,11 @@ namespace Cosmetics.Classes
                 return HookResult.Continue;
             }
             // delay one frame to allow c4 model to exist
-            Server.NextFrame(() => ChangeBombScale("weapon_c4"));
+            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(_config.Modules.BombModel.DelaySizeChange, () => ChangeBombScale("weapon_c4", true));
             return HookResult.Continue;
         }
 
-        private void ChangeBombScale(string entityName)
+        private void ChangeBombScale(string entityName, bool useKeyValues = true)
         {
             // find all planted c4 entities
             IEnumerable<CBaseEntity> bombEntities = Utilities.FindAllEntitiesByDesignerName<CBaseEntity>(entityName);
@@ -51,10 +52,23 @@ namespace Cosmetics.Classes
             {
                 float randomScale = (float)((new Random().NextDouble() *
                     (_config.Modules.BombModel.MaxSize - _config.Modules.BombModel.MinSize)) + _config.Modules.BombModel.MinSize);
-                bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().Scale = randomScale;
-                bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().AbsScale = randomScale;
-                return;
+                if (!useKeyValues)
+                {
+                    bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().Scale = randomScale;
+                    bombEntity.CBodyComponent!.SceneNode!.GetSkeletonInstance().AbsScale = randomScale;
+                    return;
+                }
+                CEntityKeyValues kv = new();
+                kv.SetFloat("modelscale", randomScale);
+                bombEntity.DispatchSpawn(kv);
+                bombEntity.Teleport(
+                    new Vector(
+                        bombEntity.AbsOrigin!.X,
+                        bombEntity.AbsOrigin!.Y,
+                        bombEntity.AbsOrigin!.Z + 20)
+                );
             }
+            return;
         }
     }
 }
