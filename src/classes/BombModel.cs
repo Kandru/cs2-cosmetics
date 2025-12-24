@@ -9,8 +9,10 @@ namespace Cosmetics.Classes
     {
         public override List<string> Events => [
             "EventBombPlanted",
+            "EventBombPickup",
             "EventBombDropped"
         ];
+        private bool _allow_bombmodel_change = false;
 
         public BombModel(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
         {
@@ -20,6 +22,7 @@ namespace Cosmetics.Classes
         public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying BombModel module...");
+            _allow_bombmodel_change = false;
         }
 
         public HookResult EventBombPlanted(EventBombPlanted @event, GameEventInfo info)
@@ -28,8 +31,19 @@ namespace Cosmetics.Classes
             {
                 return HookResult.Continue;
             }
+            _allow_bombmodel_change = true;
             // delay one frame to allow c4 model to exist
             Server.NextFrame(() => ChangeBombScale("planted_c4", false));
+            return HookResult.Continue;
+        }
+
+        public HookResult EventBombPickup(EventBombPickup @event, GameEventInfo info)
+        {
+            if (!_config.Modules.BombModel.ChangeSizeOnEquip)
+            {
+                return HookResult.Continue;
+            }
+            _allow_bombmodel_change = false;
             return HookResult.Continue;
         }
 
@@ -39,6 +53,7 @@ namespace Cosmetics.Classes
             {
                 return HookResult.Continue;
             }
+            _allow_bombmodel_change = true;
             // delay one frame to allow c4 model to exist
             _ = new CounterStrikeSharp.API.Modules.Timers.Timer(_config.Modules.BombModel.DelaySizeChange, () => ChangeBombScale("weapon_c4", true));
             return HookResult.Continue;
@@ -46,6 +61,12 @@ namespace Cosmetics.Classes
 
         private void ChangeBombScale(string entityName, bool useKeyValues = true)
         {
+            // stop model change if not allowed
+            if (!_allow_bombmodel_change)
+            {
+                return;
+            }
+            _allow_bombmodel_change = false;
             // find all planted c4 entities
             IEnumerable<CBaseEntity> bombEntities = Utilities.FindAllEntitiesByDesignerName<CBaseEntity>(entityName);
             foreach (CBaseEntity bombEntity in bombEntities)
