@@ -20,6 +20,7 @@ CounterstrikeSharp - Cosmetics is a plugin for Counter-Strike 2 that allows serv
 - Tombstone which spawns on player death
 - Model for spectators (defaults to a small airplane)
 - Changing bomb model
+- Highlight bomb when dropped and/or planted
 
 
 ## Installation
