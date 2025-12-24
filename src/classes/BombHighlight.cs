@@ -14,6 +14,7 @@ namespace Cosmetics.Classes
             "EventBombPickup",
             "EventRoundEnd"
         ];
+        private bool _allow_bomb_highlight = false;
         private (CDynamicProp?, CDynamicProp?) _highlightedBomb = (null, null);
 
         public BombHighlight(PluginConfig Config, IStringLocalizer Localizer) : base(Config, Localizer)
@@ -24,6 +25,7 @@ namespace Cosmetics.Classes
         public override void Destroy()
         {
             Console.WriteLine("[Cosmetics] Destroying BombHighlight module...");
+            _allow_bomb_highlight = false;
             Glow.RemoveGlow(_highlightedBomb.Item1, _highlightedBomb.Item2);
             _highlightedBomb = (null, null);
         }
@@ -34,8 +36,10 @@ namespace Cosmetics.Classes
             {
                 return HookResult.Continue;
             }
-            // delay one frame to allow c4 model to exist
-            Server.NextFrame(() => HighlightBomb("planted_c4"));
+            _allow_bomb_highlight = true;
+            // delay at least one frame to allow model to exist
+            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(_config.Modules.BombHighlight.DelayHighlight,
+                () => HighlightBomb("planted_c4"));
             return HookResult.Continue;
         }
 
@@ -45,13 +49,16 @@ namespace Cosmetics.Classes
             {
                 return HookResult.Continue;
             }
-            // delay one frame to allow c4 model to exist
-            Server.NextFrame(() => HighlightBomb("weapon_c4"));
+            _allow_bomb_highlight = true;
+            // delay at least one frame to allow model to exist
+            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(_config.Modules.BombHighlight.DelayHighlight,
+                () => HighlightBomb("weapon_c4"));
             return HookResult.Continue;
         }
 
         public HookResult EventBombPickup(EventBombPickup @event, GameEventInfo info)
         {
+            _allow_bomb_highlight = false;
             Glow.RemoveGlow(_highlightedBomb.Item1, _highlightedBomb.Item2);
             _highlightedBomb = (null, null);
             return HookResult.Continue;
@@ -59,6 +66,7 @@ namespace Cosmetics.Classes
 
         public HookResult EventRoundEnd(EventRoundEnd @event, GameEventInfo info)
         {
+            _allow_bomb_highlight = false;
             Glow.RemoveGlow(_highlightedBomb.Item1, _highlightedBomb.Item2);
             _highlightedBomb = (null, null);
             return HookResult.Continue;
@@ -66,6 +74,11 @@ namespace Cosmetics.Classes
 
         private void HighlightBomb(string entityName)
         {
+            // stop highlight if not allowed
+            if (!_allow_bomb_highlight)
+            {
+                return;
+            }
             // find all planted c4 entities
             IEnumerable<CBaseEntity> bombEntities = Utilities.FindAllEntitiesByDesignerName<CBaseEntity>(entityName);
             foreach (CBaseEntity bombEntity in bombEntities)
