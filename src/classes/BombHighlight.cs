@@ -9,6 +9,8 @@ namespace Cosmetics.Classes
     public class BombHighlight : ParentModule
     {
         public override List<string> Events => [
+            "EventBombBegindefuse",
+            "EventBombAbortdefuse",
             "EventBombPlanted",
             "EventBombDropped",
             "EventBombPickup",
@@ -28,6 +30,32 @@ namespace Cosmetics.Classes
             _allow_bomb_highlight = false;
             Glow.RemoveGlow(_highlightedBomb.Item1, _highlightedBomb.Item2);
             _highlightedBomb = (null, null);
+        }
+
+        public HookResult EventBombBegindefuse(EventBombBegindefuse @event, GameEventInfo info)
+        {
+            if (!_config.Modules.BombHighlight.HighlightPlantedC4
+                || _config.Modules.BombHighlight.HighlightOnDefuse)
+            {
+                return HookResult.Continue;
+            }
+            _allow_bomb_highlight = false;
+            Glow.RemoveGlow(_highlightedBomb.Item1, _highlightedBomb.Item2);
+            _highlightedBomb = (null, null);
+            return HookResult.Continue;
+        }
+
+        public HookResult EventBombAbortdefuse(EventBombAbortdefuse @event, GameEventInfo info)
+        {
+            if (!_config.Modules.BombHighlight.HighlightPlantedC4)
+            {
+                return HookResult.Continue;
+            }
+            _allow_bomb_highlight = true;
+            // delay at least one frame to allow model to exist
+            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(_config.Modules.BombHighlight.DelayHighlight,
+                () => HighlightBomb("planted_c4"));
+            return HookResult.Continue;
         }
 
         public HookResult EventBombPlanted(EventBombPlanted @event, GameEventInfo info)
