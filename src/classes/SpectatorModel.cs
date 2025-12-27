@@ -114,7 +114,9 @@ namespace Cosmetics.Classes
         {
             CCSPlayerController? player = @event.Userid;
             if (player == null
-                || !player.IsValid)
+                || !player.IsValid
+                || player.IsBot
+                || player.IsHLTV)
             {
                 return HookResult.Continue;
             }
@@ -144,7 +146,9 @@ namespace Cosmetics.Classes
         {
             CCSPlayerController? player = @event.Userid;
             if (player == null
-                || !player.IsValid)
+                || !player.IsValid
+                || player.IsBot
+                || player.IsHLTV)
             {
                 return HookResult.Continue;
             }
@@ -186,6 +190,8 @@ namespace Cosmetics.Classes
         {
             // sanity checks
             if (player == null
+            || player.IsBot
+            || player.IsHLTV
             || player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null)
             {
                 return null;
@@ -233,6 +239,8 @@ namespace Cosmetics.Classes
                 || !prop.IsValid
                 || prop.AbsRotation == null
                 || player == null
+                || player.IsBot
+                || player.IsHLTV
                 || player.Pawn == null
                 || player.Pawn.Value == null
                 || !player.Pawn.IsValid)
